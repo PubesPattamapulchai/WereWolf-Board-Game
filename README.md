@@ -21,6 +21,22 @@
 8. ผู้เล่นที่ถึงคิวส่ง Night Action จากหน้า Player
 9. จบ Night แล้วเข้าสู่ช่วงกลางวันและการโหวต
 
+## Night Team Communication
+
+เพื่อไม่ให้คนอื่นจับได้จากท่าทางการพิมพ์ ระบบใช้ **Silent Pack Vote** เป็นวิธีหลักสำหรับฝูงหมาป่า:
+
+- เปิดเฉพาะตอน Night และเฉพาะช่วงที่ Role หมาป่ากำลังทำ Action
+- หมาป่าแต่ละคนเพียงแตะเป้าหมาย 1 คนจากรายการเดิม
+- ระบบรวมจำนวนเสียงของฝูงแบบ realtime เช่น `Mint 2 เสียง / Bank 1 เสียง`
+- ไม่บอกว่า Wolf คนไหนเลือกใคร เพื่อให้คุยกันแบบเงียบและลดการชี้นำ
+- เพื่อนหมาป่าจะไม่ปรากฏเป็นเป้าหมายให้เลือก
+- มี Quick Signal เช่น `เห็นด้วย`, `เปลี่ยนเป้า`, `ระวัง`, `ล็อกเป้า` ซึ่งใช้การแตะเพียงครั้งเดียว
+- มี text chat ลับเป็นตัวเลือกเสริม แต่ซ่อนไว้ในเมนูย่อย เพราะเวลาเล่นต่อหน้ากันการพิมพ์อาจทำให้คนอื่นสังเกตได้
+- เมื่อ Role หลับตาหรือออกจาก Night phase ช่องทางทั้งหมดจะถูกปิดทันที
+- Villager ไม่มี faction chat
+
+Firebase Rules อนุญาตให้เฉพาะผู้เล่นที่ยังมีชีวิตและมี Role ฝ่าย `Werewolves` ใน phase ปัจจุบันเท่านั้นที่อ่าน/เขียน Pack Link ได้ Host ที่เล่นด้วยแต่ไม่ใช่หมาป่าจะอ่านช่องนี้ไม่ได้จาก client ปกติ
+
 ## Day Vote Flow
 
 ระบบใช้ Hidden Ballot ทั้งสองรอบ:
@@ -109,4 +125,4 @@ Role ที่มีกติกาหลาย Variant ยังให้ระ
 
 อย่าใช้ Realtime Database แบบ public test rules ในเว็บจริง
 
-`firebase.rules.json` ใช้ Firebase Authentication `uid` เพื่อจำกัด Role, Night Action และ ballot ของผู้เล่น รวมถึงล็อก Hidden Ballot ไม่ให้ Host อ่านก่อนปิดรอบ
+`firebase.rules.json` ใช้ Firebase Authentication `uid` เพื่อจำกัด Role, Night Action, Pack Link และ ballot ของผู้เล่น รวมถึงล็อก Hidden Ballot ไม่ให้ Host อ่านก่อนปิดรอบ
