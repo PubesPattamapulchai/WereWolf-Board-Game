@@ -20,6 +20,7 @@ function injectUI(){
 injectUI();
 
 let db=null,auth=null,uid="",room="",myName="",players={},privateState={},publicState={},selected=new Set(),lastPhase="",voteId="",voteChoice="",voteSent="";
+let firebaseReadyPromise=null,firebaseConnectError=null;
 const join=$("joinView"),game=$("gameView"),lobby=$("lobbyView"),roleView=$("roleView"),phaseView=$("phaseView"),turnView=$("turnView"),voteView=$("pvVoteView");
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
 function path(x=""){return`rooms/${room}${x?"/"+x:""}`}
@@ -28,6 +29,40 @@ function roleName(r){return r?.th&&r.th!==r.name?r.th:(r?.name||"")}
 function factionMeta(role){const cat=role?.cat||"Neutral";if(cat==="Werewolves")return{key:"werewolves",icon:"🐺",label:"ฝ่ายหมาป่า",lore:"รู้จักฝูงของตัวเอง และทำ Action ตอนกลางคืน"};if(cat==="Villagers")return{key:"villagers",icon:"🛡️",label:"ฝ่ายชาวบ้าน",lore:"ช่วยหาหมาป่าและใช้ความสามารถพิเศษเพื่อปกป้องหมู่บ้าน"};if(cat==="Neutral")return{key:"neutral",icon:"🕯️",label:"Role กลาง",lore:"มีเงื่อนไขชนะของตัวเองหรือเป็น Role เฉพาะทาง"};return{key:"additional",icon:"✨",label:"Role เสริม",lore:"Role เสริมที่เพิ่มสีสันหรือ house rule ให้เกม"}}
 function applyRoleTheme(role){const meta=factionMeta(role);const revealed=$("revealedRoleCard"),hidden=$("hiddenRoleCard"),turn=$("turnView");revealed&&(revealed.dataset.faction=meta.key);hidden&&(hidden.dataset.faction=meta.key);turn&&(turn.dataset.faction=meta.key);$("roleFactionBadge")&&($("roleFactionBadge").textContent=`${meta.icon} ${meta.label}`);$("roleCrest")&&($("roleCrest").textContent=meta.icon);$("roleLore")&&($("roleLore").textContent=meta.lore);return meta}
 function connection(t){$("connectionStatus").textContent=t}
+async function connectFirebase(){
+  if(db&&uid)return true;
+  if(firebaseReadyPromise)return firebaseReadyPromise;
+  firebaseReadyPromise=(async()=>{
+    firebaseConnectError=null;
+    connection("กำลังเชื่อม Firebase…");
+    const joinBtn=$("joinBtn");if(joinBtn){joinBtn.disabled=true;joinBtn.textContent="กำลังเชื่อม…"}
+    try{
+      if(!isFirebaseConfigured())throw Object.assign(new Error("Firebase config ไม่ครบ"),{code:"config/not-ready"});
+      const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);
+      uid=(await signInAnonymously(auth)).user.uid;
+      connection("ออนไลน์ ✓");
+      if(joinBtn){joinBtn.disabled=false;joinBtn.textContent="เข้าห้อง"}
+      return true;
+    }catch(e){
+      console.error("Firebase connection failed",e);
+      firebaseConnectError=e;
+      db=null;uid="";
+      const code=e?.code||"unknown";
+      connection(`เชื่อมไม่สำเร็จ • ${code}`);
+      if(joinBtn){joinBtn.disabled=false;joinBtn.textContent="ลองเชื่อมอีกครั้ง"}
+      throw e;
+    }finally{firebaseReadyPromise=null}
+  })();
+  return firebaseReadyPromise;
+}
+async function ensureFirebaseReady(){
+  if(db&&uid)return true;
+  try{return await connectFirebase()}catch(e){
+    const code=e?.code||"unknown";
+    alert(`เชื่อม Firebase ไม่สำเร็จ (${code})\n\nตรวจว่า Firebase Authentication → Anonymous เปิดใช้งานอยู่ และลองรีเฟรชหน้าอีกครั้ง`);
+    return false;
+  }
+}
 function renderPlayers(){const list=Object.entries(players||{}).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));$("playerList").innerHTML=list.map(([id,p])=>{const dead=p.alive===false,reason=p.eliminatedBy==="vote"?" • ถูกโหวตออก":dead?" • ถูกกำจัด":"";return`<div class="player"><span class="dot ${dead?"dead":p.connected===false?"off":""}"></span>${esc(p.name)}${id===uid?" (คุณ)":""}${p.isHost?" • 👑 Host":""}${esc(reason)}${dead?" • 🔒 ไม่เปิด Role":""}</div>`}).join("");const me=players?.[uid],dead=me?.alive===false;$("deadBanner").classList.toggle("hidden",!dead);if(dead)$("deadBanner").textContent="☠️ คุณถูกกำจัดแล้ว — Role จะไม่ถูกเปิดเผย และคุณไม่มี Action/สิทธิ์โหวตต่อ"}
 function renderRole(){const r=privateState?.role;if(!r)return;applyRoleTheme(r);$("roleName").textContent=roleName(r);$("roleEnglish").textContent=r.th&&r.th!==r.name?r.name:r.cat||"";$("roleAbility").textContent=r.ability||r.action||"ทำความสามารถตามกติกา";const extras=[];if(privateState?.teammates?.length)extras.push(`เพื่อนที่คุณรู้จัก: ${privateState.teammates.map(x=>x.name).join(", ")}`);if(privateState?.loverName)extras.push(`คู่รัก: ${privateState.loverName}`);$("teamText").textContent=extras.join(" • ");$("teamText").classList.toggle("hidden",!extras.length)}
 function renderMorning(){const p=publicState?.phase||{},el=$("pvMorning");let t="";if(p.state==="day"){const d=Array.isArray(p.morningDeaths)?p.morningDeaths:[];t=d.length?`เมื่อคืน ${d.join(" และ ")} ถูกกำจัด • ไม่มีการเปิดเผย Role`:"เมื่อคืนไม่มีใครถูกกำจัด"}else if(p.state==="vote-result"&&p.eliminatedName)t=`${p.eliminatedName} ถูกโหวตออก • ไม่มีการเปิดเผย Role`;else if(p.state==="gameover")t=`เกมจบ • ${p.winner||""} ชนะ`;el.textContent=t;el.classList.toggle("hidden",!t)}
@@ -36,8 +71,8 @@ function renderTurn(t){if(lastPhase!==t.phaseId){lastPhase=t.phaseId;selected.cl
 async function action(skip=false){const t=privateState?.turn;if(!t?.phaseId)return;await set(ref(db,path(`actions/${t.night}/${t.phaseId}/${uid}`)),{selected:skip?[]:[...selected],skipped:skip,saveWolfTarget:!skip&&t.behavior?.kind==="witch"?Boolean($("pvWitchSave").checked):false,submittedAt:Date.now()});$("sentMessage").textContent="✓ ส่ง Action แล้ว • รอฟังเสียงเรียกหลับตา";$("sentMessage").classList.remove("hidden");$("submitActionBtn").classList.add("hidden");$("skipActionBtn").classList.add("hidden")}
 function renderVote(){const p=publicState?.phase||{},id=p.voteId||"";if(voteId!==id){voteId=id;voteChoice="";voteSent=""}const list=Object.entries(players).filter(([id,p])=>p.alive!==false&&id!==uid);$("pvVoteTargets").innerHTML=list.map(([id,p])=>`<button class="pv-vote-target ${voteChoice===id?"selected":""}" data-pvv="${id}" type="button">${esc(p.name)}${p.isHost?" 👑":""}</button>`).join("");document.querySelectorAll("[data-pvv]").forEach(x=>x.onclick=()=>{if(voteSent===voteId)return;voteChoice=x.dataset.pvv;renderVote()});const sent=voteSent===voteId;$("pvSubmitVote").disabled=!voteChoice||sent;$("pvSubmitVote").classList.toggle("hidden",sent);$("pvVoteSent").classList.toggle("hidden",!sent)}
 async function submitVote(){if(!voteId||!voteChoice)return;await set(ref(db,path(`votes/${voteId}/${uid}`)),{target:voteChoice,submittedAt:Date.now()});voteSent=voteId;renderVote()}
-async function joinRoom(){if(!db||!uid)return alert("ยังไม่ได้เชื่อม Firebase");const code=$("roomInput").value.trim().toUpperCase(),name=$("nameInput").value.trim();if(code.length!==5)return alert("Room Code ต้องมี 5 ตัว");if(!name)return alert("กรุณาใส่ชื่อ");if(!(await get(ref(db,`rooms/${code}/hostUid`))).exists())return alert("ไม่พบห้องนี้");room=code;myName=name;const pr=ref(db,path(`players/${uid}`)),old=await get(pr),u={name,connected:true};if(!old.exists())u.joinedAt=Date.now();await update(pr,u);try{await onDisconnect(ref(db,path(`players/${uid}/connected`))).set(false)}catch{}localStorage.setItem("ww_player_room",room);localStorage.setItem("ww_player_name",name);$("roomText").textContent=room;$("meText").textContent=name;join.classList.add("hidden");game.classList.remove("hidden");onValue(ref(db,path("public")),s=>{publicState=s.val()||{};renderState()});onValue(ref(db,path("players")),s=>{players=s.val()||{};renderState()});onValue(ref(db,path(`private/${uid}`)),s=>{privateState=s.val()||{};renderState()})}
+async function joinRoom(){if(!(await ensureFirebaseReady()))return;const code=$("roomInput").value.trim().toUpperCase(),name=$("nameInput").value.trim();if(code.length!==5)return alert("Room Code ต้องมี 5 ตัว");if(!name)return alert("กรุณาใส่ชื่อ");if(!(await get(ref(db,`rooms/${code}/hostUid`))).exists())return alert("ไม่พบห้องนี้");room=code;myName=name;const pr=ref(db,path(`players/${uid}`)),old=await get(pr),u={name,connected:true};if(!old.exists())u.joinedAt=Date.now();await update(pr,u);try{await onDisconnect(ref(db,path(`players/${uid}/connected`))).set(false)}catch{}localStorage.setItem("ww_player_room",room);localStorage.setItem("ww_player_name",name);$("roomText").textContent=room;$("meText").textContent=name;join.classList.add("hidden");game.classList.remove("hidden");onValue(ref(db,path("public")),s=>{publicState=s.val()||{};renderState()});onValue(ref(db,path("players")),s=>{players=s.val()||{};renderState()});onValue(ref(db,path(`private/${uid}`)),s=>{privateState=s.val()||{};renderState()})}
 
 $("joinBtn").onclick=joinRoom;$("roomInput").oninput=e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-Z2-9]/g,"").slice(0,5);$("revealBtn").onclick=()=>{$("hiddenRoleCard").classList.add("hidden");$("revealedRoleCard").classList.remove("hidden")};$("hideRoleBtn").onclick=()=>{$("revealedRoleCard").classList.add("hidden");$("hiddenRoleCard").classList.remove("hidden")};$("submitActionBtn").onclick=()=>action(false);$("skipActionBtn").onclick=()=>action(true);$("pvWitchSave").onchange=()=>privateState?.turn&&renderTurn(privateState.turn);$("pvSubmitVote").onclick=submitVote;
 
-(async()=>{const q=new URLSearchParams(location.search);$("roomInput").value=(q.get("room")||localStorage.getItem("ww_player_room")||"").toUpperCase();$("nameInput").value=localStorage.getItem("ww_player_name")||"";if(!isFirebaseConfigured()){$("setupWarning").classList.remove("hidden");connection("ต้องตั้งค่า Firebase");$("joinBtn").disabled=true;return}try{const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);uid=(await signInAnonymously(auth)).user.uid;connection("ออนไลน์")}catch(e){console.error(e);connection("เชื่อมไม่สำเร็จ")}})();
+(async()=>{const q=new URLSearchParams(location.search);$("roomInput").value=(q.get("room")||localStorage.getItem("ww_player_room")||"").toUpperCase();$("nameInput").value=localStorage.getItem("ww_player_name")||"";if(!isFirebaseConfigured()){$("setupWarning").classList.remove("hidden");connection("ต้องตั้งค่า Firebase");$("joinBtn").disabled=true;return}try{await connectFirebase()}catch(e){/* ปุ่มจะเปลี่ยนเป็น “ลองเชื่อมอีกครั้ง” และผู้ใช้กด retry ได้ */}})();
