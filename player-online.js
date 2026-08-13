@@ -5,13 +5,14 @@ import { firebaseConfig, isFirebaseConfigured } from "./firebase-config.js";
 
 const $=(id)=>document.getElementById(id);
 let db=null,auth=null,uid="",room="",myName="",players={},privateState={},publicState={};
-let selected=new Set(),selectedVote="",lastPhaseId="";
-const joinView=$("joinView"),gameView=$("gameView"),lobbyView=$("lobbyView"),roleView=$("roleView"),phaseView=$("phaseView"),turnView=$("turnView"),voteView=$("voteView");
+let selected=new Set(),selectedVote="",lastPhaseId="",defenseTimer=null;
+const joinView=$("joinView"),gameView=$("gameView"),lobbyView=$("lobbyView"),roleView=$("roleView"),phaseView=$("phaseView"),turnView=$("turnView"),voteView=$("voteView"),defenseView=$("defenseView");
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
 function roomPath(path=""){return `rooms/${room}${path?"/"+path:""}`}
-function showOnly(view){[lobbyView,roleView,phaseView,turnView,voteView].forEach(v=>v.classList.add("hidden"));view?.classList.remove("hidden")}
+function showOnly(view){[lobbyView,roleView,phaseView,turnView,voteView,defenseView].forEach(v=>v.classList.add("hidden"));view?.classList.remove("hidden")}
 function displayRole(role){return role?.th&&role.th!==role.name?role.th:(role?.name||"")}
+function stopDefenseTimer(){if(defenseTimer)clearInterval(defenseTimer);defenseTimer=null}
 function renderPlayers(){
   const arr=Object.entries(players||{}).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
   $("playerList").innerHTML=arr.map(([id,p])=>{const alive=p.alive!==false;const reason=p.eliminatedBy==="vote"?" • ถูกโหวตออก":p.eliminatedBy==="werewolf"?" • โดนหมาป่ากำจัด":(!alive?" • ถูกกำจัด":"");return `<div class="player"><span class="dot ${!alive?"dead":p.connected===false?"off":""}"></span>${esc(p.name||"Player")}${id===uid?" (คุณ)":""}${alive?"":esc(reason)}${alive?"":" • 🔒 ไม่เปิด Role"}</div>`}).join("");
@@ -30,6 +31,22 @@ function renderVote(){
   $("voteList").innerHTML=alive.map(([id,p])=>`<button class="target ${selectedVote===id?"selected":""}" data-vote="${id}">${esc(p.name||"Player")}${id===uid?" (คุณ)":""}</button>`).join("");
   $("voteList").querySelectorAll("[data-vote]").forEach(b=>b.addEventListener("click",()=>{selectedVote=b.dataset.vote;renderVote();$("submitVoteBtn").disabled=false}));
 }
+function renderDefense(){
+  const phase=publicState?.phase||{};
+  if(phase.state!=="defense")return;
+  const candidateUid=phase.candidateUid||"";
+  const candidateName=players?.[candidateUid]?.name||"ผู้เล่น";
+  $("defenseName").textContent=candidateName;
+  $("defensePlayerMessage").textContent=candidateUid===uid
+    ?"คุณได้คะแนนสูงสุด ใช้เวลานี้พูดแก้ตัวก่อน Host ยืนยันผล"
+    :`กำลังฟังคำแก้ตัวของ ${candidateName}`;
+  stopDefenseTimer();
+  const tick=()=>{
+    const remaining=Math.max(0,Math.ceil(((Number(phase.defenseEndsAt)||Date.now())-Date.now())/1000));
+    $("defensePlayerClock").textContent=remaining;
+  };
+  tick();defenseTimer=setInterval(tick,250);
+}
 function renderTurn(turn){
   if(lastPhaseId!==turn.phaseId){selected.clear();lastPhaseId=turn.phaseId;$("sentMessage").classList.add("hidden");$("submitActionBtn").classList.remove("hidden");$("skipActionBtn").classList.toggle("hidden",!turn?.behavior?.optional)}
   $("turnRole").textContent=displayRole(turn.role);$("turnAction").textContent=turn.action||turn.ability||"ทำความสามารถของคุณ";
@@ -45,7 +62,9 @@ function renderState(){
   renderPlayers();renderRole();
   const role=privateState?.role,turn=privateState?.turn,me=players?.[uid],dead=me&&me.alive===false,phase=publicState?.phase||{};
   if(!role){showOnly(lobbyView);$("lobbyText").textContent="เข้าห้องแล้ว • รอ Host แจก Role";return}
-  if(dead){showOnly(phaseView);$("phaseTitle").textContent="คุณถูกกำจัดแล้ว";$("phaseSub").textContent="Role จะไม่ถูกเปิดเผย";return}
+  if(dead){stopDefenseTimer();showOnly(phaseView);$("phaseTitle").textContent="คุณถูกกำจัดแล้ว";$("phaseSub").textContent="Role จะไม่ถูกเปิดเผย";return}
+  if(phase.state==="defense"){showOnly(defenseView);renderDefense();return}
+  stopDefenseTimer();
   if(phase.state==="vote"){showOnly(voteView);renderVote();return}
   if(!turn||turn.state==="lobby"){showOnly(roleView);return}
   if(turn.active){renderTurn(turn);showOnly(turnView);return}
@@ -67,4 +86,4 @@ async function joinRoom(){
 }
 function attachListeners(){onValue(ref(db,roomPath("public")),s=>{publicState=s.val()||{};renderState()});onValue(ref(db,roomPath("players")),s=>{players=s.val()||{};renderState()});onValue(ref(db,roomPath(`private/${uid}`)),s=>{privateState=s.val()||{};renderState()})}
 $("joinBtn").addEventListener("click",joinRoom);$("revealBtn").addEventListener("click",()=>{$("hiddenRoleCard").classList.add("hidden");$("revealedRoleCard").classList.remove("hidden")});$("hideRoleBtn").addEventListener("click",()=>{$("revealedRoleCard").classList.add("hidden");$("hiddenRoleCard").classList.remove("hidden")});$("submitActionBtn").addEventListener("click",()=>submitAction(false));$("skipActionBtn").addEventListener("click",()=>submitAction(true));$("submitVoteBtn").addEventListener("click",submitVote);
-(async function boot(){const qp=new URLSearchParams(location.search);$("roomInput").value=(qp.get("room")||localStorage.getItem("ww_player_room")||"").toUpperCase();$("nameInput").value=localStorage.getItem("ww_player_name")||"";if(qp.get("host")==="1")$("hostNote").classList.remove("hidden");if(!isFirebaseConfigured()){setConnection("ต้องตั้งค่า Firebase");$("joinBtn").disabled=true;return}try{const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);const cred=await signInAnonymously(auth);uid=cred.user.uid;$("connectionStatus").textContent="ออนไลน์"}catch(err){console.error(err);$("connectionStatus").textContent="เชื่อมไม่สำเร็จ"}})();
+(async function boot(){const qp=new URLSearchParams(location.search);$("roomInput").value=(qp.get("room")||localStorage.getItem("ww_player_room")||"").toUpperCase();$("nameInput").value=localStorage.getItem("ww_player_name")||"";if(qp.get("host")==="1")$("hostNote").classList.remove("hidden");if(!isFirebaseConfigured()){$("connectionStatus").textContent="ต้องตั้งค่า Firebase";$("joinBtn").disabled=true;return}try{const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);const cred=await signInAnonymously(auth);uid=cred.user.uid;$("connectionStatus").textContent="ออนไลน์"}catch(err){console.error(err);$("connectionStatus").textContent="เชื่อมไม่สำเร็จ"}})();
