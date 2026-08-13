@@ -2,7 +2,7 @@
 
 ชุดเว็บ 2 ฝั่งที่ใช้คู่กัน:
 
-- `index.html` — **Moderator**
+- `index.html` — **Host / Game Controller**
 - `player.html` — **Player Companion**
 - `firebase-config.js` — Firebase project config
 - `firebase.rules.json` — Realtime Database Security Rules
@@ -11,20 +11,35 @@
 
 ## Flow การเล่น
 
-1. Moderator เปิด `index.html`
-2. ตั้ง Role ให้จำนวน **เท่ากับจำนวนผู้เล่น** (Role ซ้ำได้)
+1. Host เปิด `index.html` และสามารถเลือก **เล่นด้วย** ได้
+2. ตั้ง Role ให้จำนวนเท่ากับจำนวนผู้เล่นทั้งหมด รวม Host ถ้า Host เล่นด้วย
 3. กด **สร้างห้องออนไลน์**
-4. ผู้เล่นเปิด `player.html` และใส่ Room Code หรือใช้ลิงก์ที่ Moderator คัดลอกให้
-5. เมื่อผู้เล่นครบ Moderator กด **สุ่มแจก Role**
-6. ผู้เล่นแต่ละคนแตะดู Role ลับของตัวเอง
-7. Moderator เริ่ม Night Phase ตามปกติ
-8. เมื่อ Role ใดถูกเรียก:
-   - ผู้เล่น Role นั้นจะเห็นหน้าจอ Action
-   - เลือกเป้าหมาย 1/2 คนตาม Role
-   - ส่งคำตอบกลับ Moderator
-   - ผู้เล่น Role อื่นเห็นเพียง “หลับตา”
-9. Moderator เห็นคำตอบที่ส่งเข้ามาแบบ realtime ใต้ Timer
-10. Moderator สามารถทำให้ผู้เล่น “ออกจากเกม/คืนเกม” จาก Online Room ได้
+4. ผู้เล่นเปิด `player.html` และใส่ Room Code หรือใช้ลิงก์จาก Host
+5. เมื่อผู้เล่นครบ Host กด **สุ่มแจก Role**
+6. ผู้เล่นแต่ละคนดู Role ลับของตัวเอง
+7. Host กดเริ่ม Night หนึ่งครั้ง จากนั้นระบบเรียก Role ด้วยเสียงและไล่ Night Order อัตโนมัติ
+8. ผู้เล่นที่ถึงคิวส่ง Night Action จากหน้า Player
+9. จบ Night แล้วเข้าสู่ช่วงกลางวันและการโหวต
+
+## Day Vote Flow
+
+ระบบใช้ Hidden Ballot ทั้งสองรอบ:
+
+1. Host กด **เริ่มโหวตรอบแรก**
+2. ผู้เล่นทุกคนเลือกคนที่ต้องการเสนอให้ออกจากเกม
+3. หลังผู้เล่นกดส่ง คะแนนจะถูกล็อกและแก้ไม่ได้
+4. ระหว่างรอบไม่มีใคร รวมถึง Host เห็นว่าใครเลือกใคร เห็นเพียงจำนวนคนที่ส่งแล้ว
+5. Host กด **ปิดโหวตและเปิดผล**
+6. ระบบจึงเปิดพร้อมกันว่าใครโหวตใคร และหาคนคะแนนสูงสุด
+7. ถ้าคะแนนสูงสุดไม่เสมอ ผู้เล่นคนนั้นเข้าสู่ **ช่วงแก้ตัว 60 วินาที**
+8. เมื่อหมดเวลา Host กด **เปิดโหวตรอบยืนยัน**
+9. ผู้เล่นทุกคนเลือก `เอาออก` หรือ `ไม่เอาออก` แบบ Hidden Ballot และคำตอบถูกล็อกหลังส่ง
+10. Host กด **ปิดโหวตและเปิดผล** แล้วระบบจึงเปิดพร้อมกันว่าใครเลือก `เอาออก / ไม่เอาออก`
+11. ถ้า `เอาออก > ไม่เอาออก` ผู้เล่นคนนั้นถูกกำจัด
+12. ถ้า `ไม่เอาออก >= เอาออก` ผู้เล่นคนนั้นรอด
+13. ไม่ว่าผลใด **Role ของผู้ถูกกำจัดจะไม่ถูกเปิดเผย**
+
+Security Rules บังคับให้ผู้เล่นเขียนคะแนนได้ครั้งเดียวต่อรอบ และ Host อ่าน ballot จริงได้เฉพาะหลังปิดรอบแล้ว
 
 ## ตั้งค่า Firebase
 
@@ -51,54 +66,28 @@ Firebase Console → Realtime Database → Create database
 Official docs:
 https://firebase.google.com/docs/database/web/start
 
-### 4. ใส่ Firebase Config
+### 4. Firebase Config
 
-เปิด `firebase-config.js` แล้วนำ config จาก Firebase มาแทน:
+โปรเจกต์นี้ตั้งค่าไว้กับ:
 
-```js
-export const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  databaseURL: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
-};
-```
+- Project ID: `werewolf-board-game-9b361`
+- Realtime Database region: `asia-southeast1`
 
-`databaseURL` จำเป็นสำหรับ Realtime Database
+### 5. Security Rules
 
-### 5. ใส่ Security Rules
+เปิด Firebase Console → Realtime Database → Rules แล้วคัดลอกเนื้อหาจาก `firebase.rules.json` ไปวางและกด **Publish**
 
-เปิด Firebase Console → Realtime Database → Rules
-
-คัดลอกเนื้อหาจาก `firebase.rules.json` ไปวางแล้ว Publish
-
-Rules ชุดนี้ออกแบบให้:
-- ผู้เล่นอ่านข้อมูลสาธารณะของห้องได้
-- ผู้เล่นแก้ได้เฉพาะชื่อ/สถานะการเชื่อมต่อของตัวเอง ส่วน alive/assigned ให้ Moderator คุม
-- Role ลับอยู่ใน `private/<uid>` และผู้เล่นอ่านได้เฉพาะของตัวเอง
-- Action ของผู้เล่นเขียนได้เฉพาะ uid ของตัวเอง
-- Moderator (host uid) อ่านข้อมูล private/actions ทั้งห้องได้
+> ทุกครั้งที่ `firebase.rules.json` ใน GitHub ถูกอัปเดต ต้อง Publish Rules เวอร์ชันล่าสุดใน Firebase Console ด้วย
 
 ## Deploy GitHub Pages
 
-Upload ไฟล์ทั้งหมดใน ZIP ขึ้น repository เดียวกัน
+GitHub → **Settings → Pages → Deploy from a branch → main → /(root)**
 
-GitHub:
-**Settings → Pages → Deploy from a branch → main → /(root)**
-
-จากนั้น:
-
-- Moderator: `https://YOURNAME.github.io/REPO/`
+- Host: `https://YOURNAME.github.io/REPO/`
 - Player: `https://YOURNAME.github.io/REPO/player.html`
 
-Moderator มีปุ่ม **คัดลอกลิงก์** ซึ่งจะใส่ Room Code ใน URL ให้ผู้เล่นอัตโนมัติ
+## Night Action Examples
 
-## หมายเหตุเรื่องกติกา
-
-ระบบ Player Companion ตั้ง target count พื้นฐานให้อัตโนมัติ เช่น:
 - Werewolf → เลือก 1 คน
 - Seer → เช็ค 1 คน
 - Bodyguard → ป้องกัน 1 คน
@@ -106,40 +95,18 @@ Moderator มีปุ่ม **คัดลอกลิงก์** ซึ่ง�
 - Mentalist → เลือก 2 คน
 - Role ที่ไม่ต้องเลือกเป้าหมาย → ปุ่ม “เสร็จแล้ว”
 
-Role ที่มีกติกาหลาย Variant ยังให้ Moderator เป็นผู้ตัดสินผลจริง เพื่อไม่ล็อกเว็บเข้ากับ house rule ใด house rule หนึ่ง
-
-## Security
-
-อย่าใช้ Realtime Database แบบ public test rules ในเว็บที่เผยแพร่จริง  
-ไฟล์ `firebase.rules.json` ใช้ Firebase Authentication `uid` เพื่อจำกัดข้อมูล private ของผู้เล่น
-
-Firebase Security Rules docs:
-https://firebase.google.com/docs/database/security
+Role ที่มีกติกาหลาย Variant ยังให้ระบบรองรับ house rule โดยไม่ล็อกทุกความสามารถตายตัว
 
 ## No Role Reveal Rule
 
-ระบบนี้ใช้กติกา **No Reveal** โดยค่าเริ่มต้น:
+- ถูกโหวตออก → แสดงเพียงว่า `ถูกโหวตออก`
+- โดนหมาป่ากำจัด → แสดงเพียงว่า `โดนหมาป่ากำจัด`
+- ไม่มีการประกาศหรือแสดง Role หลังถูกกำจัด
+- Role ยังคงเป็นข้อมูล private ของผู้เล่น
+- ผู้เล่นที่ถูกกำจัดจะไม่ถูกเรียกทำ Night Action ต่อ
 
-- ถ้าผู้เล่นถูกโหวตออก → ทุกคนเห็นเฉพาะว่า `ถูกโหวตออก`
-- ถ้าผู้เล่นโดนหมาป่ากำจัด → ทุกคนเห็นเฉพาะว่า `โดนหมาป่ากำจัด`
-- **ไม่มีการประกาศหรือแสดง Role ของผู้เล่นที่ถูกกำจัด**
-- Role ยังคงอยู่เฉพาะใน `private/<uid>` ของผู้เล่นคนนั้นและ Moderator
-- public player list เก็บเฉพาะชื่อ, alive/dead state และสาเหตุการถูกกำจัด
-- เมื่อผู้เล่นตาย ระบบจะยกเลิก Night Action ของคนนั้นทันที
-- หน้า Player ที่ตายจะไม่กลับไปแสดงหน้าการ์ด Role อีกระหว่างเกม
+## Security
 
-Moderator มีปุ่มแยก `โหวตออก` และ `หมาป่าฆ่า` เพื่อบันทึกสาเหตุโดยไม่เผย Role
+อย่าใช้ Realtime Database แบบ public test rules ในเว็บจริง
 
-## Firebase Project ที่ใส่ไว้แล้ว
-
-แพ็กเกจนี้ตั้งค่า Web App ให้ใช้ Firebase Project:
-
-- Project ID: `werewolf-board-game-9b361`
-- Realtime Database region: `asia-southeast1`
-
-ไม่ต้องแก้ `firebase-config.js` เพิ่ม เว้นแต่ต้องการย้ายไป Firebase Project อื่น
-
-ยังต้องตรวจใน Firebase Console ให้เรียบร้อยว่า:
-1. Authentication → Anonymous = Enabled
-2. Realtime Database ถูกสร้างแล้ว
-3. Realtime Database Rules ใช้เนื้อหาจาก `firebase.rules.json`
+`firebase.rules.json` ใช้ Firebase Authentication `uid` เพื่อจำกัด Role, Night Action และ ballot ของผู้เล่น รวมถึงล็อก Hidden Ballot ไม่ให้ Host อ่านก่อนปิดรอบ
