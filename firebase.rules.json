@@ -15,27 +15,13 @@
         "players": {
           ".read": "auth != null && root.child('rooms').child($room).child('hostUid').exists()",
           "$uid": {
-            "name": {
-              ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
-            },
-            "connected": {
-              ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
-            },
-            "joinedAt": {
-              ".write": "auth != null && (root.child('rooms').child($room).child('hostUid').val() == auth.uid || (auth.uid == $uid && !data.exists()))"
-            },
-            "alive": {
-              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
-            },
-            "assigned": {
-              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
-            },
-            "eliminatedBy": {
-              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
-            },
-            "eliminatedAt": {
-              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
-            }
+            "name": { ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)" },
+            "connected": { ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)" },
+            "joinedAt": { ".write": "auth != null && (root.child('rooms').child($room).child('hostUid').val() == auth.uid || (auth.uid == $uid && !data.exists()))" },
+            "alive": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" },
+            "assigned": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" },
+            "eliminatedBy": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" },
+            "eliminatedAt": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" }
           }
         },
         "private": {
@@ -51,8 +37,17 @@
               ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid",
               "$uid": {
                 ".read": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)",
-                ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
+                ".write": "auth != null && auth.uid == $uid"
               }
+            }
+          }
+        },
+        "votes": {
+          "$voteId": {
+            ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid",
+            "$uid": {
+              ".read": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)",
+              ".write": "auth != null && auth.uid == $uid"
             }
           }
         }
