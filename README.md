@@ -1,8 +1,16 @@
 # Werewolf Connected Game
 
+อัปเกรดล่าสุดด้าน UI/UX:
+
+- ปรับธีมภาพรวมให้เป็นแนว **fantasy card / board game** มากขึ้น
+- แยกโทนสีของแต่ละฝั่งชัดเจน: **Villagers / Werewolves / Neutral / Additional**
+- รายการ Role, Night Order และหน้าการ์ดของผู้เล่นมี **crest / badge / card-style visuals** เพื่ออ่านง่ายขึ้น
+- หน้าผู้เล่นมี **Role card แบบใหม่** ที่เปลี่ยนหน้าตาตามฝ่ายของ Role อัตโนมัติ
+- ใช้กราฟิกที่ออกแบบขึ้นใหม่ในโค้ดเอง เพื่อหลีกเลี่ยงปัญหาลิขสิทธิ์ของการ์ดทางการ
+
 ชุดเว็บ 2 ฝั่งที่ใช้คู่กัน:
 
-- `index.html` — **Host / Game Controller**
+- `index.html` — **Moderator**
 - `player.html` — **Player Companion**
 - `firebase-config.js` — Firebase project config
 - `firebase.rules.json` — Realtime Database Security Rules
@@ -11,51 +19,20 @@
 
 ## Flow การเล่น
 
-1. Host เปิด `index.html` และสามารถเลือก **เล่นด้วย** ได้
-2. ตั้ง Role ให้จำนวนเท่ากับจำนวนผู้เล่นทั้งหมด รวม Host ถ้า Host เล่นด้วย
+1. Moderator เปิด `index.html`
+2. ตั้ง Role ให้จำนวน **เท่ากับจำนวนผู้เล่น** (Role ซ้ำได้)
 3. กด **สร้างห้องออนไลน์**
-4. ผู้เล่นเปิด `player.html` และใส่ Room Code หรือใช้ลิงก์จาก Host
-5. เมื่อผู้เล่นครบ Host กด **สุ่มแจก Role**
-6. ผู้เล่นแต่ละคนดู Role ลับของตัวเอง
-7. Host กดเริ่ม Night หนึ่งครั้ง จากนั้นระบบเรียก Role ด้วยเสียงและไล่ Night Order อัตโนมัติ
-8. ผู้เล่นที่ถึงคิวส่ง Night Action จากหน้า Player
-9. จบ Night แล้วเข้าสู่ช่วงกลางวันและการโหวต
-
-## Night Team Communication
-
-เพื่อไม่ให้คนอื่นจับได้จากท่าทางการพิมพ์ ระบบใช้ **Silent Pack Vote** เป็นวิธีหลักสำหรับฝูงหมาป่า:
-
-- เปิดเฉพาะตอน Night และเฉพาะช่วงที่ Role หมาป่ากำลังทำ Action
-- หมาป่าแต่ละคนเพียงแตะเป้าหมาย 1 คนจากรายการเดิม
-- ระบบรวมจำนวนเสียงของฝูงแบบ realtime เช่น `Mint 2 เสียง / Bank 1 เสียง`
-- ไม่บอกว่า Wolf คนไหนเลือกใคร เพื่อให้คุยกันแบบเงียบและลดการชี้นำ
-- เพื่อนหมาป่าจะไม่ปรากฏเป็นเป้าหมายให้เลือก
-- มี Quick Signal เช่น `เห็นด้วย`, `เปลี่ยนเป้า`, `ระวัง`, `ล็อกเป้า` ซึ่งใช้การแตะเพียงครั้งเดียว
-- มี text chat ลับเป็นตัวเลือกเสริม แต่ซ่อนไว้ในเมนูย่อย เพราะเวลาเล่นต่อหน้ากันการพิมพ์อาจทำให้คนอื่นสังเกตได้
-- เมื่อ Role หลับตาหรือออกจาก Night phase ช่องทางทั้งหมดจะถูกปิดทันที
-- Villager ไม่มี faction chat
-
-Firebase Rules อนุญาตให้เฉพาะผู้เล่นที่ยังมีชีวิตและมี Role ฝ่าย `Werewolves` ใน phase ปัจจุบันเท่านั้นที่อ่าน/เขียน Pack Link ได้ Host ที่เล่นด้วยแต่ไม่ใช่หมาป่าจะอ่านช่องนี้ไม่ได้จาก client ปกติ
-
-## Day Vote Flow
-
-ระบบใช้ Hidden Ballot ทั้งสองรอบ:
-
-1. Host กด **เริ่มโหวตรอบแรก**
-2. ผู้เล่นทุกคนเลือกคนที่ต้องการเสนอให้ออกจากเกม
-3. หลังผู้เล่นกดส่ง คะแนนจะถูกล็อกและแก้ไม่ได้
-4. ระหว่างรอบไม่มีใคร รวมถึง Host เห็นว่าใครเลือกใคร เห็นเพียงจำนวนคนที่ส่งแล้ว
-5. Host กด **ปิดโหวตและเปิดผล**
-6. ระบบจึงเปิดพร้อมกันว่าใครโหวตใคร และหาคนคะแนนสูงสุด
-7. ถ้าคะแนนสูงสุดไม่เสมอ ผู้เล่นคนนั้นเข้าสู่ **ช่วงแก้ตัว 60 วินาที**
-8. เมื่อหมดเวลา Host กด **เปิดโหวตรอบยืนยัน**
-9. ผู้เล่นทุกคนเลือก `เอาออก` หรือ `ไม่เอาออก` แบบ Hidden Ballot และคำตอบถูกล็อกหลังส่ง
-10. Host กด **ปิดโหวตและเปิดผล** แล้วระบบจึงเปิดพร้อมกันว่าใครเลือก `เอาออก / ไม่เอาออก`
-11. ถ้า `เอาออก > ไม่เอาออก` ผู้เล่นคนนั้นถูกกำจัด
-12. ถ้า `ไม่เอาออก >= เอาออก` ผู้เล่นคนนั้นรอด
-13. ไม่ว่าผลใด **Role ของผู้ถูกกำจัดจะไม่ถูกเปิดเผย**
-
-Security Rules บังคับให้ผู้เล่นเขียนคะแนนได้ครั้งเดียวต่อรอบ และ Host อ่าน ballot จริงได้เฉพาะหลังปิดรอบแล้ว
+4. ผู้เล่นเปิด `player.html` และใส่ Room Code หรือใช้ลิงก์ที่ Moderator คัดลอกให้
+5. เมื่อผู้เล่นครบ Moderator กด **สุ่มแจก Role**
+6. ผู้เล่นแต่ละคนแตะดู Role ลับของตัวเอง
+7. Moderator เริ่ม Night Phase ตามปกติ
+8. เมื่อ Role ใดถูกเรียก:
+   - ผู้เล่น Role นั้นจะเห็นหน้าจอ Action
+   - เลือกเป้าหมาย 1/2 คนตาม Role
+   - ส่งคำตอบกลับ Moderator
+   - ผู้เล่น Role อื่นเห็นเพียง “หลับตา”
+9. Moderator เห็นคำตอบที่ส่งเข้ามาแบบ realtime ใต้ Timer
+10. Moderator สามารถทำให้ผู้เล่น “ออกจากเกม/คืนเกม” จาก Online Room ได้
 
 ## ตั้งค่า Firebase
 
@@ -82,28 +59,54 @@ Firebase Console → Realtime Database → Create database
 Official docs:
 https://firebase.google.com/docs/database/web/start
 
-### 4. Firebase Config
+### 4. ใส่ Firebase Config
 
-โปรเจกต์นี้ตั้งค่าไว้กับ:
+เปิด `firebase-config.js` แล้วนำ config จาก Firebase มาแทน:
 
-- Project ID: `werewolf-board-game-9b361`
-- Realtime Database region: `asia-southeast1`
+```js
+export const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  databaseURL: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
+```
 
-### 5. Security Rules
+`databaseURL` จำเป็นสำหรับ Realtime Database
 
-เปิด Firebase Console → Realtime Database → Rules แล้วคัดลอกเนื้อหาจาก `firebase.rules.json` ไปวางและกด **Publish**
+### 5. ใส่ Security Rules
 
-> ทุกครั้งที่ `firebase.rules.json` ใน GitHub ถูกอัปเดต ต้อง Publish Rules เวอร์ชันล่าสุดใน Firebase Console ด้วย
+เปิด Firebase Console → Realtime Database → Rules
+
+คัดลอกเนื้อหาจาก `firebase.rules.json` ไปวางแล้ว Publish
+
+Rules ชุดนี้ออกแบบให้:
+- ผู้เล่นอ่านข้อมูลสาธารณะของห้องได้
+- ผู้เล่นแก้ได้เฉพาะชื่อ/สถานะการเชื่อมต่อของตัวเอง ส่วน alive/assigned ให้ Moderator คุม
+- Role ลับอยู่ใน `private/<uid>` และผู้เล่นอ่านได้เฉพาะของตัวเอง
+- Action ของผู้เล่นเขียนได้เฉพาะ uid ของตัวเอง
+- Moderator (host uid) อ่านข้อมูล private/actions ทั้งห้องได้
 
 ## Deploy GitHub Pages
 
-GitHub → **Settings → Pages → Deploy from a branch → main → /(root)**
+Upload ไฟล์ทั้งหมดใน ZIP ขึ้น repository เดียวกัน
 
-- Host: `https://YOURNAME.github.io/REPO/`
+GitHub:
+**Settings → Pages → Deploy from a branch → main → /(root)**
+
+จากนั้น:
+
+- Moderator: `https://YOURNAME.github.io/REPO/`
 - Player: `https://YOURNAME.github.io/REPO/player.html`
 
-## Night Action Examples
+Moderator มีปุ่ม **คัดลอกลิงก์** ซึ่งจะใส่ Room Code ใน URL ให้ผู้เล่นอัตโนมัติ
 
+## หมายเหตุเรื่องกติกา
+
+ระบบ Player Companion ตั้ง target count พื้นฐานให้อัตโนมัติ เช่น:
 - Werewolf → เลือก 1 คน
 - Seer → เช็ค 1 คน
 - Bodyguard → ป้องกัน 1 คน
@@ -111,18 +114,61 @@ GitHub → **Settings → Pages → Deploy from a branch → main → /(root)**
 - Mentalist → เลือก 2 คน
 - Role ที่ไม่ต้องเลือกเป้าหมาย → ปุ่ม “เสร็จแล้ว”
 
-Role ที่มีกติกาหลาย Variant ยังให้ระบบรองรับ house rule โดยไม่ล็อกทุกความสามารถตายตัว
-
-## No Role Reveal Rule
-
-- ถูกโหวตออก → แสดงเพียงว่า `ถูกโหวตออก`
-- โดนหมาป่ากำจัด → แสดงเพียงว่า `โดนหมาป่ากำจัด`
-- ไม่มีการประกาศหรือแสดง Role หลังถูกกำจัด
-- Role ยังคงเป็นข้อมูล private ของผู้เล่น
-- ผู้เล่นที่ถูกกำจัดจะไม่ถูกเรียกทำ Night Action ต่อ
+Role ที่มีกติกาหลาย Variant ยังให้ Moderator เป็นผู้ตัดสินผลจริง เพื่อไม่ล็อกเว็บเข้ากับ house rule ใด house rule หนึ่ง
 
 ## Security
 
-อย่าใช้ Realtime Database แบบ public test rules ในเว็บจริง
+อย่าใช้ Realtime Database แบบ public test rules ในเว็บที่เผยแพร่จริง  
+ไฟล์ `firebase.rules.json` ใช้ Firebase Authentication `uid` เพื่อจำกัดข้อมูล private ของผู้เล่น
 
-`firebase.rules.json` ใช้ Firebase Authentication `uid` เพื่อจำกัด Role, Night Action, Pack Link และ ballot ของผู้เล่น รวมถึงล็อก Hidden Ballot ไม่ให้ Host อ่านก่อนปิดรอบ
+Firebase Security Rules docs:
+https://firebase.google.com/docs/database/security
+
+## No Role Reveal Rule
+
+ระบบนี้ใช้กติกา **No Reveal** โดยค่าเริ่มต้น:
+
+- ถ้าผู้เล่นถูกโหวตออก → ทุกคนเห็นเฉพาะว่า `ถูกโหวตออก`
+- ถ้าผู้เล่นโดนหมาป่ากำจัด → ทุกคนเห็นเฉพาะว่า `โดนหมาป่ากำจัด`
+- **ไม่มีการประกาศหรือแสดง Role ของผู้เล่นที่ถูกกำจัด**
+- Role ยังคงอยู่เฉพาะใน `private/<uid>` ของผู้เล่นคนนั้นและ Moderator
+- public player list เก็บเฉพาะชื่อ, alive/dead state และสาเหตุการถูกกำจัด
+- เมื่อผู้เล่นตาย ระบบจะยกเลิก Night Action ของคนนั้นทันที
+- หน้า Player ที่ตายจะไม่กลับไปแสดงหน้าการ์ด Role อีกระหว่างเกม
+
+Moderator มีปุ่มแยก `โหวตออก` และ `หมาป่าฆ่า` เพื่อบันทึกสาเหตุโดยไม่เผย Role
+
+## Firebase Project ที่ใส่ไว้แล้ว
+
+แพ็กเกจนี้ตั้งค่า Web App ให้ใช้ Firebase Project:
+
+- Project ID: `werewolf-board-game-9b361`
+- Realtime Database region: `asia-southeast1`
+
+ไม่ต้องแก้ `firebase-config.js` เพิ่ม เว้นแต่ต้องการย้ายไป Firebase Project อื่น
+
+ยังต้องตรวจใน Firebase Console ให้เรียบร้อยว่า:
+1. Authentication → Anonymous = Enabled
+2. Realtime Database ถูกสร้างแล้ว
+3. Realtime Database Rules ใช้เนื้อหาจาก `firebase.rules.json`
+
+## Premium Board-Game UI
+
+เวอร์ชันนี้เพิ่ม presentation layer โดยไม่เปลี่ยน game rules:
+
+- animated moonlight, stars และหมอกแบบ subtle
+- faction sigils แบบ original SVG สำหรับ Villagers / Werewolves / Neutral / Additional
+- Role reveal animation คล้ายพลิกการ์ด
+- card depth, shine, hover/press feedback และ ripple
+- Night Phase cinematic ambience + timer glow
+- Pack/secret-team panels มี visual hierarchy ชัดขึ้น
+- vote / defense / success states มี transition ที่อ่านสถานะง่ายขึ้น
+- รองรับ `prefers-reduced-motion` เพื่อปิด animation หนักอัตโนมัติ
+
+ไฟล์ presentation เพิ่มเติม:
+
+- `premium-theme.css`
+- `premium-effects.js`
+- `assets/*-sigil.svg`
+
+กราฟิกในชุดนี้เป็นงาน original ที่สร้างขึ้นสำหรับเว็บนี้ ไม่ได้ใช้ภาพการ์ดทางการของเกมอื่น

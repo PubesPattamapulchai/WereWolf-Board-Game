@@ -189,6 +189,36 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
 }
 .start-info strong{color:white}
 
+/* Visual polish v3 */
+.library-item,.role-card,.selected-role-card{position:relative;overflow:hidden}
+.library-item::before,.role-card::before,.selected-role-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.045),transparent 36%,transparent 64%,rgba(255,255,255,.025));opacity:.9}
+.library-main{display:grid;grid-template-columns:46px minmax(0,1fr);gap:11px;align-items:start}
+.library-crest,.role-crest,.selected-role-icon{display:grid;place-items:center;border-radius:16px;font-size:22px;font-weight:900;border:1px solid #364057;background:linear-gradient(180deg,#1d2432,#111722);box-shadow:inset 0 1px rgba(255,255,255,.06)}
+.library-crest{width:46px;height:46px}
+.role-head-main{display:grid;grid-template-columns:48px minmax(0,1fr);gap:11px;align-items:center}
+.role-crest{width:48px;height:48px;border-radius:17px;font-size:24px}
+.selected-role-main{display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:start}
+.selected-role-icon{width:34px;height:34px;border-radius:12px;font-size:18px}
+.selected-role-meta{min-width:0}
+.faction-ribbon{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid #374157;background:#171f2c;color:#d7dfeb;font-size:10px;font-weight:900;letter-spacing:.03em;margin-bottom:6px}
+.library-item[data-faction="Werewolves"],.role-card[data-faction="Werewolves"],.selected-role-card[data-faction="Werewolves"]{border-color:#5a2f39;background:linear-gradient(180deg,#1b1218,#0f131b)}
+.library-item[data-faction="Villagers"],.role-card[data-faction="Villagers"],.selected-role-card[data-faction="Villagers"]{border-color:#2f4f44;background:linear-gradient(180deg,#111a19,#0f141a)}
+.library-item[data-faction="Neutral"],.role-card[data-faction="Neutral"],.selected-role-card[data-faction="Neutral"]{border-color:#5d5031;background:linear-gradient(180deg,#191611,#101317)}
+.library-item[data-faction="Additional"],.role-card[data-faction="Additional"],.selected-role-card[data-faction="Additional"]{border-color:#3f3e69;background:linear-gradient(180deg,#151528,#10131a)}
+.library-item[data-faction="Werewolves"] .library-crest,.role-card[data-faction="Werewolves"] .role-crest,.selected-role-card[data-faction="Werewolves"] .selected-role-icon{border-color:#70404c;background:radial-gradient(circle at 30% 25%,rgba(239,68,82,.34),transparent 45%),linear-gradient(180deg,#311a22,#15111b)}
+.library-item[data-faction="Villagers"] .library-crest,.role-card[data-faction="Villagers"] .role-crest,.selected-role-card[data-faction="Villagers"] .selected-role-icon{border-color:#34604b;background:radial-gradient(circle at 30% 25%,rgba(69,196,134,.28),transparent 46%),linear-gradient(180deg,#183027,#10161a)}
+.library-item[data-faction="Neutral"] .library-crest,.role-card[data-faction="Neutral"] .role-crest,.selected-role-card[data-faction="Neutral"] .selected-role-icon{border-color:#7a6235;background:radial-gradient(circle at 30% 25%,rgba(242,184,75,.32),transparent 46%),linear-gradient(180deg,#302613,#151317)}
+.library-item[data-faction="Additional"] .library-crest,.role-card[data-faction="Additional"] .role-crest,.selected-role-card[data-faction="Additional"] .selected-role-icon{border-color:#5756a0;background:radial-gradient(circle at 30% 25%,rgba(167,139,250,.28),transparent 46%),linear-gradient(180deg,#201c39,#13131b)}
+.role-card[data-faction="Werewolves"] .order{background:linear-gradient(180deg,#341b22,#22151b);border:1px solid #6b3b46}
+.role-card[data-faction="Villagers"] .order{background:linear-gradient(180deg,#173127,#16211d);border:1px solid #36634f}
+.role-card[data-faction="Neutral"] .order{background:linear-gradient(180deg,#332915,#221b15);border:1px solid #775d2b}
+.role-card[data-faction="Additional"] .order{background:linear-gradient(180deg,#211d3b,#17192a);border:1px solid #5956a4}
+.role-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.role-mini-faction{font-size:10px;font-weight:900;letter-spacing:.05em;color:#a9b4c5;text-transform:uppercase}
+.selected-role-card{padding:10px 9px 10px 10px}
+.selected-role-card .selected-role-ability{padding-right:2px}
+.order-hero{overflow:hidden;position:relative}
+.order-hero::after{content:"";position:absolute;inset:auto -40px -55px auto;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(239,68,82,.18),transparent 68%)}
 
 /* Setup tabs */
 .setup-tabs{
@@ -463,6 +493,7 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
   *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
 </style>
+<link rel="stylesheet" href="./premium-theme.css">
 </head>
 <body>
 <main id="setupView" class="app">
@@ -1068,6 +1099,14 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
     return "";
   }
 
+  function factionMeta(role) {
+    const cat = role?.cat || "Additional";
+    if (cat === "Werewolves") return {key:"Werewolves", icon:"🐺", label:"ฝ่ายหมาป่า"};
+    if (cat === "Villagers") return {key:"Villagers", icon:"🛡️", label:"ฝ่ายชาวบ้าน"};
+    if (cat === "Neutral") return {key:"Neutral", icon:"🕯️", label:"Role กลาง"};
+    return {key:cat || "Additional", icon:"✨", label:"Role เสริม"};
+  }
+
   function modeLabel(mode) {
     return ({every:"ทุกคืน",first:"คืนแรก",manual:"ตามเงื่อนไข",never:"ไม่ตื่น"})[mode] || "ทุกคืน";
   }
@@ -1103,16 +1142,22 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
       libraryResults.innerHTML = `<div class="empty-mini">ไม่พบ Role ที่ค้นหา</div>`;
       return;
     }
-    libraryResults.innerHTML = found.map(r => `
-      <button class="library-item" data-index="${r.i}">
-        <div>
-          <div class="library-name">${esc(displayName(r))}</div>
-          <div class="library-sub">${esc(r.name !== displayName(r) ? r.name+" • " : "")}${esc(r.cat)}${Number.isFinite(r.points)?` • ${r.points>0?"+":""}${r.points} แต้ม`:""}</div>
-          <div class="library-ability"><span class="ability-icon">✦</span><span>${esc(abilitySummary(r))}</span></div>
+    libraryResults.innerHTML = found.map(r => {
+      const meta = factionMeta(r);
+      return `
+      <button class="library-item" data-index="${r.i}" data-faction="${esc(meta.key)}">
+        <div class="library-main">
+          <div class="library-crest" aria-hidden="true">${meta.icon}</div>
+          <div>
+            <div class="faction-ribbon">${meta.icon} ${esc(meta.label)}</div>
+            <div class="library-name">${esc(displayName(r))}</div>
+            <div class="library-sub">${esc(r.name !== displayName(r) ? r.name+" • " : "")}${esc(r.cat)}${Number.isFinite(r.points)?` • ${r.points>0?"+":""}${r.points} แต้ม`:""}</div>
+            <div class="library-ability"><span class="ability-icon">✦</span><span>${esc(abilitySummary(r))}</span></div>
+          </div>
         </div>
         <span class="add-circle">+</span>
-      </button>
-    `).join("");
+      </button>`;
+    }).join("");
     libraryResults.querySelectorAll(".library-item").forEach(btn => btn.addEventListener("click", () => {
       const preset = ROLE_LIBRARY[Number(btn.dataset.index)];
       if (!preset) return;
@@ -1128,18 +1173,22 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
 
     roles.forEach((role, i) => {
       const el = document.createElement("article");
-      el.className = "role-card";
+      const meta = factionMeta(role);
       el.className = `role-card ${isActiveTonight(role) ? "active-tonight" : "sleeping-role"}`;
+      el.dataset.faction = meta.key;
       el.innerHTML = `
         <div class="role-card-head">
           <div class="order">${String(i+1).padStart(2,"0")}</div>
-          <div>
-            <div class="role-title">${esc(displayName(role))}</div>
-            <div class="role-en">${role.th && role.th !== role.name ? esc(role.name) : esc(role.cat || "Custom")}</div>
-            <div class="role-tags">
-              <span class="tag ${categoryClass(role.cat)}">${esc(role.cat || "Custom")}</span>
-              <span class="tag">${modeLabel(role.mode)}</span>
-              ${Number.isFinite(role.points)?`<span class="tag">${role.points>0?"+":""}${role.points} แต้ม</span>`:""}
+          <div class="role-head-main">
+            <div class="role-crest" aria-hidden="true">${meta.icon}</div>
+            <div>
+              <div class="role-title">${esc(displayName(role))} <span class="role-mini-faction">${esc(meta.label)}</span></div>
+              <div class="role-en">${role.th && role.th !== role.name ? esc(role.name) : esc(role.cat || "Custom")}</div>
+              <div class="role-tags">
+                <span class="tag ${categoryClass(role.cat)}">${esc(role.cat || "Custom")}</span>
+                <span class="tag">${modeLabel(role.mode)}</span>
+                ${Number.isFinite(role.points)?`<span class="tag">${role.points>0?"+":""}${role.points} แต้ม</span>`:""}
+              </div>
             </div>
           </div>
           <div class="role-quick">
@@ -1226,15 +1275,20 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
     $("orderTabCount").textContent = `${tonight.length} Role ตื่นคืนนี้`;
     $("selectedRoleCount").textContent = roles.length;
     $("selectedRolesPreview").innerHTML = roles.length
-      ? roles.map((r,i)=>`
-          <div class="selected-role-card">
-            <div>
-              <div class="selected-role-name">${esc(displayName(r))}</div>
-              <div class="selected-role-ability">${esc(abilitySummary(r))}</div>
+      ? roles.map((r,i)=>{
+          const meta = factionMeta(r);
+          return `
+          <div class="selected-role-card" data-faction="${esc(meta.key)}">
+            <div class="selected-role-main">
+              <div class="selected-role-icon" aria-hidden="true">${meta.icon}</div>
+              <div class="selected-role-meta">
+                <div class="selected-role-name">${esc(displayName(r))}</div>
+                <div class="selected-role-ability">${esc(abilitySummary(r))}</div>
+              </div>
             </div>
             <button class="selected-remove" data-i="${i}" aria-label="ลบ ${esc(displayName(r))}">×</button>
-          </div>
-        `).join("")
+          </div>`;
+        }).join("")
       : `<div class="selected-empty">ยังไม่ได้เลือก Role</div>`;
     document.querySelectorAll(".selected-remove").forEach(btn => btn.addEventListener("click", () => removeRole(+btn.dataset.i)));
     updateFlowButton();
@@ -1573,5 +1627,6 @@ textarea.field{min-height:72px;resize:vertical;line-height:1.4}
 })();
 </script>
 <script type="module" src="./moderator-online.js"></script>
+<script src="./premium-effects.js"></script>
 </body>
 </html>

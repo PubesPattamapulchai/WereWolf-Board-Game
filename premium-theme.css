@@ -1,0 +1,186 @@
+/* Werewolf Premium Board-Game Theme
+   Visual-only layer. Existing game logic stays untouched. */
+:root{
+  --premium-gold:#d8b66a;
+  --premium-gold-soft:#f2dda3;
+  --premium-ink:#070910;
+  --premium-glass:rgba(15,19,29,.78);
+  --premium-line:rgba(216,182,106,.23);
+  --premium-shadow:0 28px 90px rgba(0,0,0,.48);
+  --premium-ease:cubic-bezier(.2,.78,.2,1);
+  --faction-accent:#d8b66a;
+  --faction-glow:rgba(216,182,106,.2);
+}
+
+html{scroll-behavior:smooth}
+body{position:relative;isolation:isolate;overflow-x:hidden}
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  inset:-20vmax;
+  z-index:-4;
+  pointer-events:none;
+}
+body::before{
+  background:
+    radial-gradient(circle at 15% 12%,rgba(126,73,93,.18),transparent 22%),
+    radial-gradient(circle at 86% 8%,rgba(201,160,78,.12),transparent 20%),
+    radial-gradient(circle at 55% 80%,rgba(67,79,139,.12),transparent 30%),
+    conic-gradient(from 190deg at 50% 50%,rgba(255,255,255,.018),transparent 18%,rgba(255,255,255,.014),transparent 42%);
+  animation:premiumAurora 22s ease-in-out infinite alternate;
+}
+body::after{
+  opacity:.34;
+  background-image:
+    radial-gradient(circle,rgba(255,255,255,.72) 0 1px,transparent 1.35px),
+    radial-gradient(circle,rgba(216,182,106,.55) 0 1px,transparent 1.25px);
+  background-size:87px 87px,139px 139px;
+  background-position:0 0,31px 52px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),rgba(0,0,0,.08) 70%,transparent);
+  animation:premiumStars 38s linear infinite;
+}
+
+.premium-atmosphere{position:fixed;inset:0;z-index:-3;pointer-events:none;overflow:hidden}
+.premium-orb{position:absolute;border-radius:50%;filter:blur(1px);opacity:.8}
+.premium-orb.moon{width:min(38vw,420px);aspect-ratio:1;right:-9vw;top:-11vw;background:radial-gradient(circle at 35% 32%,rgba(255,244,205,.26),rgba(213,174,96,.08) 43%,transparent 70%);filter:blur(2px);animation:premiumMoon 11s ease-in-out infinite alternate}
+.premium-orb.mist-a{width:62vw;height:22vw;left:-18vw;top:36vh;background:radial-gradient(ellipse,rgba(91,105,150,.1),transparent 67%);filter:blur(32px);animation:premiumMistA 19s ease-in-out infinite alternate}
+.premium-orb.mist-b{width:56vw;height:18vw;right:-16vw;bottom:8vh;background:radial-gradient(ellipse,rgba(130,66,82,.09),transparent 68%);filter:blur(34px);animation:premiumMistB 24s ease-in-out infinite alternate}
+.premium-vignette{position:fixed;inset:0;pointer-events:none;z-index:99;box-shadow:inset 0 0 160px rgba(0,0,0,.43);mix-blend-mode:multiply}
+
+.card{position:relative}
+.card,.role-card,.library-item,.selected-role-card,.online-player,.setting-card,.metric,.team-comms,.vote-control,.defense-control{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 18px 54px rgba(0,0,0,.22);
+}
+.card,.role-card,.secret-card,.turn-card{
+  transition:transform .32s var(--premium-ease),border-color .32s ease,box-shadow .32s ease,filter .32s ease;
+}
+.card::after,.role-card::after,.secret-card::after,.turn-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  background:linear-gradient(118deg,transparent 15%,rgba(255,255,255,.028) 37%,rgba(242,221,163,.055) 50%,transparent 63%);
+  transform:translateX(-115%);
+  transition:transform .9s var(--premium-ease);
+}
+.card:hover::after,.role-card:hover::after,.secret-card:hover::after,.turn-card:hover::after{transform:translateX(115%)}
+.card:hover,.role-card:hover{border-color:rgba(216,182,106,.32)}
+
+.brand-mark,.moon,.mini-moon{
+  position:relative;
+  isolation:isolate;
+  box-shadow:0 0 0 1px rgba(216,182,106,.14),0 10px 34px rgba(0,0,0,.3)!important;
+}
+.brand-mark::after,.moon::after,.mini-moon::after{
+  content:"";position:absolute;inset:-7px;border-radius:inherit;border:1px solid rgba(216,182,106,.12);opacity:.75;animation:premiumSigilPulse 4.6s ease-in-out infinite
+}
+.brand h1,.current-role,.role-name,.turn-role,.defense-name,.done-title,.vote-title,.result-main{
+  text-shadow:0 2px 0 rgba(0,0,0,.35),0 0 28px rgba(216,182,106,.08)
+}
+
+.setup-tabs,.online-room-card,.sticky-inner .start-info{
+  backdrop-filter:blur(18px) saturate(1.18);
+  -webkit-backdrop-filter:blur(18px) saturate(1.18);
+}
+.setup-tabs{border-color:rgba(216,182,106,.2)!important}
+.setup-tab.active{box-shadow:inset 0 1px rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.25),0 0 0 1px rgba(216,182,106,.12)!important}
+
+.btn{position:relative;overflow:hidden;isolation:isolate}
+.btn::before{
+  content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 10%,rgba(255,255,255,.11) 42%,transparent 60%);transform:translateX(-125%);transition:transform .7s var(--premium-ease)
+}
+.btn:hover::before{transform:translateX(125%)}
+.btn.primary{box-shadow:0 10px 30px rgba(137,31,49,.28),inset 0 1px rgba(255,255,255,.14)!important}
+.btn:active{transform:translateY(1px) scale(.985)!important}
+
+.role-card,.selected-role-card,.library-item{border-color:rgba(216,182,106,.12)}
+.role-card.active-tonight{box-shadow:inset 3px 0 0 rgba(225,76,94,.76),0 18px 54px rgba(0,0,0,.2)}
+.role-card.active-tonight::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 0 50%,rgba(225,76,94,.09),transparent 34%);pointer-events:none}
+.role-crest,.library-crest,.selected-role-icon{position:relative;transform:translateZ(0)}
+.role-crest::after,.library-crest::after,.selected-role-icon::after{content:"";position:absolute;inset:-4px;border:1px solid rgba(255,255,255,.07);border-radius:inherit;opacity:.75}
+
+/* Faction sigils used as subtle card watermark */
+[data-faction="Werewolves"]{--faction-accent:#e45b6b;--faction-glow:rgba(228,91,107,.2)}
+[data-faction="Villagers"]{--faction-accent:#58c995;--faction-glow:rgba(88,201,149,.18)}
+[data-faction="Neutral"]{--faction-accent:#d9b15c;--faction-glow:rgba(217,177,92,.18)}
+[data-faction="Additional"]{--faction-accent:#a58bf1;--faction-glow:rgba(165,139,241,.18)}
+[data-faction="werewolves"]{--faction-accent:#e45b6b;--faction-glow:rgba(228,91,107,.2)}
+[data-faction="villagers"]{--faction-accent:#58c995;--faction-glow:rgba(88,201,149,.18)}
+[data-faction="neutral"]{--faction-accent:#d9b15c;--faction-glow:rgba(217,177,92,.18)}
+[data-faction="additional"]{--faction-accent:#a58bf1;--faction-glow:rgba(165,139,241,.18)}
+.role-card[data-faction],.secret-card[data-faction],.turn-card[data-faction]{box-shadow:inset 0 1px rgba(255,255,255,.045),0 18px 55px rgba(0,0,0,.25),0 0 42px var(--faction-glow)}
+
+.secret-card,.turn-card{position:relative;transform-style:preserve-3d;backface-visibility:hidden}
+.secret-card.premium-reveal-in{animation:premiumCardReveal .72s var(--premium-ease) both}
+.secret-card.premium-hide-out{animation:premiumCardHide .34s ease both}
+.role-faction-badge,.turn-badge,.state-label,.defense-label,.team-live{box-shadow:inset 0 1px rgba(255,255,255,.07),0 5px 18px rgba(0,0,0,.2)}
+.role-crest{animation:premiumCrestFloat 4.8s ease-in-out infinite}
+.role-crest img{width:72%;height:72%;object-fit:contain;filter:drop-shadow(0 5px 10px rgba(0,0,0,.3))}
+
+.premium-role-watermark{position:absolute;right:-22px;bottom:-24px;width:150px;height:150px;opacity:.09;pointer-events:none;filter:drop-shadow(0 0 18px var(--faction-glow));transform:rotate(-7deg)}
+.premium-role-watermark img{width:100%;height:100%;object-fit:contain}
+
+.play-shell{position:relative;isolation:isolate;overflow:hidden}
+.play-shell::before{content:"";position:absolute;width:min(58vw,680px);aspect-ratio:1;border-radius:50%;left:50%;top:-32vw;transform:translateX(-50%);background:radial-gradient(circle,rgba(240,216,155,.12),rgba(185,120,101,.04) 42%,transparent 68%);filter:blur(3px);animation:premiumMoon 12s ease-in-out infinite alternate;z-index:-1}
+.play-shell::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.38) 0 1px,transparent 1.2px);background-size:94px 94px;opacity:.12;z-index:-1;animation:premiumStars 45s linear infinite}
+.stage-inner{animation:premiumStageIn .5s var(--premium-ease)}
+.timer{box-shadow:0 24px 70px rgba(0,0,0,.38),0 0 55px rgba(239,72,86,.08)}
+.timer::before{box-shadow:inset 0 0 45px rgba(0,0,0,.28),0 0 0 1px rgba(216,182,106,.08)}
+.timer.urgent{filter:drop-shadow(0 18px 42px rgba(240,183,75,.16))}
+.timer.critical{filter:drop-shadow(0 18px 46px rgba(255,56,75,.26))}
+
+/* Player phase feel */
+.phase-card,.defense-view,.result-card,.pv-vote{position:relative;overflow:hidden}
+.phase-card::before,.defense-view::before,.result-card::before,.pv-vote::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% -10%,rgba(216,182,106,.08),transparent 46%)}
+.sleep-moon,.defense-icon,.pv-vote-icon,.big-icon{display:inline-block;filter:drop-shadow(0 12px 28px rgba(0,0,0,.38));animation:premiumCrestFloat 5.4s ease-in-out infinite}
+.choice,.target,.pv-vote-target{transition:transform .18s var(--premium-ease),border-color .18s,background .18s,box-shadow .18s}
+.choice:hover,.target:hover,.pv-vote-target:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.2)}
+.target.selected,.pv-vote-target.selected,.choice.selected{box-shadow:0 0 0 1px var(--faction-accent),0 10px 28px var(--faction-glow)}
+.sent,.pv-vote-sent{animation:premiumSuccess .42s var(--premium-ease) both}
+.premium-urgent{box-shadow:0 0 0 1px rgba(239,68,84,.28),0 20px 60px rgba(130,24,40,.24)!important;animation:premiumUrgent 1s ease-in-out infinite alternate}
+.premium-urgent .defense-clock,.premium-urgent #defenseClock{color:#ffd1d6;text-shadow:0 0 28px rgba(239,68,84,.4)}
+
+.team-comms{position:relative;overflow:hidden;border-color:rgba(228,91,107,.34)!important;background:linear-gradient(145deg,rgba(45,19,26,.92),rgba(14,18,27,.96))!important}
+.team-comms::before{content:"";position:absolute;width:210px;height:210px;right:-82px;top:-86px;background:url('./assets/wolf-sigil.svg') center/contain no-repeat;opacity:.06;pointer-events:none}
+.team-dot{box-shadow:0 0 14px rgba(239,68,84,.8);animation:premiumDot 1.6s ease-in-out infinite}
+.team-consensus-row.top{box-shadow:0 0 0 1px rgba(228,91,107,.22),0 10px 24px rgba(0,0,0,.16)}
+
+.premium-ripple{position:absolute;border-radius:50%;pointer-events:none;background:rgba(255,255,255,.17);transform:scale(0);animation:premiumRipple .55s ease-out forwards;z-index:8}
+.premium-particle{position:fixed;width:5px;height:5px;border-radius:50%;pointer-events:none;z-index:120;background:var(--premium-gold-soft);box-shadow:0 0 12px rgba(242,221,163,.72);animation:premiumParticle .75s ease-out forwards}
+
+/* Mobile: premium without making screens heavy */
+@media(max-width:680px){
+  body::after{opacity:.2;background-size:112px 112px,171px 171px}
+  .premium-orb.moon{width:72vw;right:-28vw;top:-18vw}
+  .premium-vignette{box-shadow:inset 0 0 95px rgba(0,0,0,.35)}
+  .card:hover,.role-card:hover{transform:none!important}
+  .card::after,.role-card::after{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  body::before,body::after,.premium-orb,.brand-mark::after,.moon::after,.mini-moon::after,.role-crest,.sleep-moon,.defense-icon,.pv-vote-icon,.big-icon,.team-dot,.play-shell::before,.play-shell::after{animation:none!important}
+  .secret-card.premium-reveal-in,.secret-card.premium-hide-out,.stage-inner,.sent,.pv-vote-sent{animation:none!important}
+  .card,.role-card,.secret-card,.turn-card,.choice,.target,.pv-vote-target,.btn{transition-duration:.01ms!important}
+  .card::after,.role-card::after,.secret-card::after,.turn-card::after,.btn::before{display:none!important}
+}
+
+@keyframes premiumAurora{from{transform:translate3d(-1.5%,0,0) rotate(-1deg)}to{transform:translate3d(1.5%,1%,0) rotate(1deg)}}
+@keyframes premiumStars{to{background-position:87px 174px,170px 260px}}
+@keyframes premiumMoon{from{transform:translateY(-8px) scale(.98);opacity:.65}to{transform:translateY(8px) scale(1.025);opacity:.92}}
+@keyframes premiumMistA{from{transform:translateX(-2%) translateY(-8%)}to{transform:translateX(13%) translateY(6%)}}
+@keyframes premiumMistB{from{transform:translateX(8%) translateY(4%)}to{transform:translateX(-12%) translateY(-6%)}}
+@keyframes premiumSigilPulse{0%,100%{transform:scale(.95);opacity:.35}50%{transform:scale(1.08);opacity:.8}}
+@keyframes premiumCrestFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-4px) rotate(1deg)}}
+@keyframes premiumCardReveal{0%{opacity:0;transform:perspective(900px) rotateY(-18deg) translateY(18px) scale(.95);filter:blur(6px)}55%{opacity:1;filter:blur(0)}100%{transform:perspective(900px) rotateY(0) translateY(0) scale(1)}}
+@keyframes premiumCardHide{to{opacity:0;transform:perspective(900px) rotateY(12deg) translateY(8px) scale(.97)}}
+@keyframes premiumStageIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes premiumSuccess{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes premiumDot{0%,100%{opacity:.55;transform:scale(.82)}50%{opacity:1;transform:scale(1.18)}}
+@keyframes premiumUrgent{to{filter:brightness(1.08)}}
+@keyframes premiumRipple{to{transform:scale(3.8);opacity:0}}
+@keyframes premiumParticle{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}

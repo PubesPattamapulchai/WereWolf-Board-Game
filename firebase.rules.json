@@ -15,13 +15,30 @@
         "players": {
           ".read": "auth != null && root.child('rooms').child($room).child('hostUid').exists()",
           "$uid": {
-            "name": { ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)" },
-            "connected": { ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)" },
-            "joinedAt": { ".write": "auth != null && (root.child('rooms').child($room).child('hostUid').val() == auth.uid || (auth.uid == $uid && !data.exists()))" },
-            "alive": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" },
-            "assigned": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" },
-            "eliminatedBy": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" },
-            "eliminatedAt": { ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid" }
+            "name": {
+              ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
+            },
+            "connected": {
+              ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
+            },
+            "joinedAt": {
+              ".write": "auth != null && (root.child('rooms').child($room).child('hostUid').val() == auth.uid || (auth.uid == $uid && !data.exists()))"
+            },
+            "alive": {
+              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
+            },
+            "assigned": {
+              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
+            },
+            "eliminatedBy": {
+              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
+            },
+            "eliminatedAt": {
+              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
+            },
+            "isHost": {
+              ".write": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid"
+            }
           }
         },
         "private": {
@@ -37,66 +54,17 @@
               ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid",
               "$uid": {
                 ".read": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)",
-                ".write": "auth != null && auth.uid == $uid"
-              }
-            }
-          }
-        },
-        "teamSignals": {
-          "$night": {
-            "$phaseId": {
-              "$channel": {
-                ".read": "auth != null && $channel == 'werewolves' && root.child('rooms').child($room).child('players').child(auth.uid).child('alive').val() != false && root.child('rooms').child($room).child('private').child(auth.uid).child('role').child('cat').val() == 'Werewolves' && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('active').val() == true && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('phaseId').val() == $phaseId && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'night' && root.child('rooms').child($room).child('public').child('phase').child('phaseId').val() == $phaseId",
-                "$uid": {
-                  ".write": "auth != null && auth.uid == $uid && $channel == 'werewolves' && root.child('rooms').child($room).child('players').child(auth.uid).child('alive').val() != false && root.child('rooms').child($room).child('private').child(auth.uid).child('role').child('cat').val() == 'Werewolves' && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('active').val() == true && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('phaseId').val() == $phaseId && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'night' && root.child('rooms').child($room).child('public').child('phase').child('phaseId').val() == $phaseId && newData.child('target').isString() && root.child('rooms').child($room).child('players').child(newData.child('target').val()).child('alive').val() != false && newData.child('target').val() != auth.uid && root.child('rooms').child($room).child('private').child(newData.child('target').val()).child('role').child('cat').val() != 'Werewolves'"
-                }
-              }
-            }
-          }
-        },
-        "teamChat": {
-          "$night": {
-            "$phaseId": {
-              "$channel": {
-                ".read": "auth != null && $channel == 'werewolves' && root.child('rooms').child($room).child('players').child(auth.uid).child('alive').val() != false && root.child('rooms').child($room).child('private').child(auth.uid).child('role').child('cat').val() == 'Werewolves' && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('active').val() == true && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('phaseId').val() == $phaseId && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'night' && root.child('rooms').child($room).child('public').child('phase').child('phaseId').val() == $phaseId",
-                "$messageId": {
-                  ".write": "auth != null && $channel == 'werewolves' && !data.exists() && newData.child('senderUid').val() == auth.uid && newData.child('text').isString() && root.child('rooms').child($room).child('players').child(auth.uid).child('alive').val() != false && root.child('rooms').child($room).child('private').child(auth.uid).child('role').child('cat').val() == 'Werewolves' && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('active').val() == true && root.child('rooms').child($room).child('private').child(auth.uid).child('turn').child('phaseId').val() == $phaseId && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'night' && root.child('rooms').child($room).child('public').child('phase').child('phaseId').val() == $phaseId"
-                }
+                ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
               }
             }
           }
         },
         "votes": {
           "$voteId": {
-            ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid && (root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote_reveal' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'defense' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote_result')",
-            "$uid": {
-              ".read": "auth != null && auth.uid == $uid",
-              ".write": "auth != null && auth.uid == $uid && !data.exists() && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote' && root.child('rooms').child($room).child('public').child('phase').child('voteId').val() == $voteId"
-            }
-          }
-        },
-        "voteReceipts": {
-          "$voteId": {
             ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid",
             "$uid": {
-              ".write": "auth != null && auth.uid == $uid && !data.exists() && newData.val() == true && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote' && root.child('rooms').child($room).child('public').child('phase').child('voteId').val() == $voteId"
-            }
-          }
-        },
-        "confirmVotes": {
-          "$confirmId": {
-            ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid && (root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_reveal' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_result')",
-            "$uid": {
-              ".read": "auth != null && auth.uid == $uid",
-              ".write": "auth != null && auth.uid == $uid && !data.exists() && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_vote' && root.child('rooms').child($room).child('public').child('phase').child('confirmId').val() == $confirmId && (newData.child('choice').val() == 'eliminate' || newData.child('choice').val() == 'pardon')"
-            }
-          }
-        },
-        "confirmReceipts": {
-          "$confirmId": {
-            ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid",
-            "$uid": {
-              ".write": "auth != null && auth.uid == $uid && !data.exists() && newData.val() == true && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_vote' && root.child('rooms').child($room).child('public').child('phase').child('confirmId').val() == $confirmId"
+              ".read": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)",
+              ".write": "auth != null && (auth.uid == $uid || root.child('rooms').child($room).child('hostUid').val() == auth.uid)"
             }
           }
         }
