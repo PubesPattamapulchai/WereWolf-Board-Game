@@ -5,6 +5,7 @@ import { firebaseConfig, isFirebaseConfigured } from "./firebase-config.js";
 import { behaviorFor, roleKey, safeRole } from "./game-rules.js";
 
 const $ = (id) => document.getElementById(id);
+const DEFENSE_SECONDS = 60;
 
 function installHostPlayerUI(){
   const card=document.querySelector(".online-room-card");
@@ -18,14 +19,20 @@ function installHostPlayerUI(){
     .host-play-box input[type=checkbox]{width:18px;height:18px;accent-color:#ef4454}
     .host-name{min-height:42px}
     .room-extra-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
-    .vote-control{margin-top:10px;padding:10px;border-radius:14px;border:1px solid #3a445a;background:#0e141e}
+    .vote-control,.defense-control{margin-top:10px;padding:10px;border-radius:14px;border:1px solid #3a445a;background:#0e141e}
     .vote-control-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:7px}
     .vote-control-title{font-size:12px;font-weight:900}
     .vote-control-sub{font-size:10px;color:#8f9bad}
     .vote-results{display:grid;gap:5px;margin-top:7px}
     .vote-result-row{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:6px 8px;border-radius:9px;background:#151c28}
     .vote-result-row b{color:#f0d69a}
-    @media(max-width:720px){.host-play-setup{grid-template-columns:1fr}}
+    .defense-control{border-color:#5d4827;background:linear-gradient(135deg,#241d12,#10151f)}
+    .defense-title{font-size:12px;font-weight:950;color:#f5d28f}
+    .defense-candidate{font-size:20px;font-weight:950;margin-top:6px}
+    .defense-clock{font-size:40px;line-height:1;font-weight:950;font-variant-numeric:tabular-nums;color:#fff;margin:10px 0 5px}
+    .defense-actions{display:grid;grid-template-columns:1.2fr 1fr;gap:7px;margin-top:10px}
+    .defense-note{font-size:10px;color:#aeb8c7;line-height:1.45}
+    @media(max-width:720px){.host-play-setup{grid-template-columns:1fr}.defense-actions{grid-template-columns:1fr}}
   `;
   document.head.appendChild(style);
 
@@ -63,15 +70,30 @@ function installHostPlayerUI(){
           <div class="vote-control-title">ผลโหวตปัจจุบัน</div>
           <div id="voteProgressText" class="vote-control-sub">0 / 0 คนโหวตแล้ว</div>
         </div>
-        <button id="confirmVoteBtn" class="btn primary" type="button" style="min-height:36px;padding:6px 9px;font-size:11px">ยืนยันผลโหวต</button>
+        <button id="confirmVoteBtn" class="btn primary" type="button" style="min-height:36px;padding:6px 9px;font-size:11px">ปิดโหวต → ให้แก้ตัว</button>
       </div>
       <div id="voteResults" class="vote-results"></div>
     `;
     extra.insertAdjacentElement("afterend",vote);
+
+    const defense=document.createElement("div");
+    defense.id="defenseControl";
+    defense.className="defense-control hidden";
+    defense.innerHTML=`
+      <div class="defense-title">⚖️ ช่วงแก้ตัว</div>
+      <div id="defenseCandidate" class="defense-candidate">—</div>
+      <div><span id="defenseClock" class="defense-clock">60</span> <span class="vote-control-sub">วินาที</span></div>
+      <div id="defenseHostNote" class="defense-note">ฟังคำแก้ตัวให้จบ แล้ว Host ต้องยืนยันอีกครั้งว่าจะโหวตออกจริงหรือไม่</div>
+      <div class="defense-actions">
+        <button id="eliminateAfterDefenseBtn" class="btn primary" type="button">ยืนยันโหวตออกจริง</button>
+        <button id="pardonAfterDefenseBtn" class="btn secondary" type="button">ไม่เอาออก</button>
+      </div>
+    `;
+    vote.insertAdjacentElement("afterend",defense);
   }
 
   const desc=card.querySelector(".online-head .panel-desc");
-  if(desc) desc.textContent="คนสร้างห้องเล่นด้วยได้ • Host กดเริ่ม Night / เริ่มโหวต / ยืนยันโหวต ส่วนการเรียก Role กลางคืนใช้เสียงอัตโนมัติ";
+  if(desc) desc.textContent="คนสร้างห้องเล่นด้วยได้ • Host กดเริ่ม Night / เริ่มโหวต / ยืนยันหลังช่วงแก้ตัว ส่วนการเรียก Role กลางคืนใช้เสียงอัตโนมัติ";
 }
 
 installHostPlayerUI();
@@ -95,11 +117,17 @@ const confirmVoteBtn = $("confirmVoteBtn");
 const voteControl = $("voteControl");
 const voteProgressText = $("voteProgressText");
 const voteResults = $("voteResults");
+const defenseControl = $("defenseControl");
+const defenseCandidate = $("defenseCandidate");
+const defenseClock = $("defenseClock");
+const eliminateAfterDefenseBtn = $("eliminateAfterDefenseBtn");
+const pardonAfterDefenseBtn = $("pardonAfterDefenseBtn");
 
 let db=null, auth=null, hostUid=null, roomCode="";
 let players={}, privateData={};
 let currentPhaseId="", currentNight=1, currentExpected=[];
 let stopActions=null, voteId="", currentVotes={}, stopVotes=null;
+let defenseCandidateUid="", defenseEndsAt=0, defenseTimer=null, defenseEndSpoken=false;
 
 function setStatus(text, connected=false){
   statusEl.textContent=text;
@@ -123,6 +151,15 @@ function displayRole(role){
 }
 function hostIsPlayer(){return Boolean(hostUid&&players?.[hostUid])}
 function aliveEntries(){return Object.entries(players||{}).filter(([,p])=>p.alive!==false)}
+function say(text){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="th-TH";u.rate=.92;u.pitch=.96;
+    speechSynthesis.speak(u);
+  }catch{}
+}
 
 function renderPlayers(){
   const entries=Object.entries(players||{}).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
@@ -262,10 +299,53 @@ function listenVotes(id){
   voteId=id;
   stopVotes=onValue(ref(db,roomPath(`votes/${id}`)),snap=>renderVotes(snap.val()||{}));
 }
+function stopDefenseClock(){
+  if(defenseTimer) clearInterval(defenseTimer);
+  defenseTimer=null;
+}
+function renderDefenseClock(){
+  if(!defenseEndsAt) return;
+  const remaining=Math.max(0,Math.ceil((defenseEndsAt-Date.now())/1000));
+  defenseClock.textContent=remaining;
+  if(remaining<=0&&!defenseEndSpoken){
+    defenseEndSpoken=true;
+    say("หมดเวลาแก้ตัว กรุณายืนยันผลโหวต");
+  }
+}
+function startDefenseClock(){
+  stopDefenseClock();
+  renderDefenseClock();
+  defenseTimer=setInterval(renderDefenseClock,250);
+}
+async function startDefense(targetUid,score){
+  defenseCandidateUid=targetUid;
+  defenseEndsAt=Date.now()+DEFENSE_SECONDS*1000;
+  defenseEndSpoken=false;
+  stopVotes?.();
+  voteControl.classList.add("hidden");
+  defenseControl.classList.remove("hidden");
+  defenseCandidate.textContent=`${playerName(targetUid)} • ${score} เสียง`;
+  startDefenseClock();
+  await update(ref(db,roomPath()),{
+    "public/status":"defense",
+    "public/phase":{
+      state:"defense",
+      voteId,
+      night:currentNight||1,
+      candidateUid:targetUid,
+      score,
+      defenseEndsAt,
+      startedAt:Date.now()
+    }
+  });
+  say(`${playerName(targetUid)} ได้คะแนนสูงสุด มีเวลาแก้ตัว ${DEFENSE_SECONDS} วินาที`);
+}
 async function startVote(){
   if(!roomCode||!db) return alert("ยังไม่ได้สร้างห้อง");
   const alive=aliveEntries();
   if(alive.length<2) return alert("ผู้เล่นที่ยังอยู่ในเกมไม่พอสำหรับการโหวต");
+  stopDefenseClock();
+  defenseControl.classList.add("hidden");
   voteId=`v_${Date.now().toString(36)}`;
   currentVotes={};
   await update(ref(db,roomPath()),{
@@ -279,21 +359,44 @@ async function startVote(){
 async function confirmVote(){
   if(!voteId) return alert("ยังไม่มี Vote Phase");
   const alive=aliveEntries(),submitted=Object.keys(currentVotes||{}).length;
-  if(submitted<alive.length&&!confirm(`ตอนนี้โหวตแล้ว ${submitted}/${alive.length} คน\nยืนยันผลตอนนี้เลยหรือไม่?`)) return;
+  if(submitted<alive.length&&!confirm(`ตอนนี้โหวตแล้ว ${submitted}/${alive.length} คน\nปิดโหวตและเข้าสู่ช่วงแก้ตัวเลยหรือไม่?`)) return;
   const counts={};
   Object.values(currentVotes||{}).forEach(v=>{if(v?.target) counts[v.target]=(counts[v.target]||0)+1});
   const ranked=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   if(!ranked.length) return alert("ยังไม่มีคะแนนโหวต");
   const topScore=ranked[0][1],top=ranked.filter(([,n])=>n===topScore);
   if(top.length>1){
-    await update(ref(db,roomPath("public/phase")),{state:"day",voteResult:"tie",confirmedAt:Date.now()});
+    await update(ref(db,roomPath()),{
+      "public/status":"day",
+      "public/phase":{state:"day",night:currentNight||1,voteResult:"tie",confirmedAt:Date.now()}
+    });
     voteControl.classList.add("hidden");stopVotes?.();
+    say("คะแนนโหวตเสมอ ไม่มีใครถูกกำจัด");
     return alert("คะแนนเสมอ — ไม่มีใครถูกกำจัด");
   }
-  const targetUid=top[0][0];
-  await eliminatePlayer(targetUid,"vote");
-  await update(ref(db,roomPath("public/phase")),{state:"day",voteResult:"eliminated",eliminatedUid:targetUid,confirmedAt:Date.now()});
-  voteControl.classList.add("hidden");stopVotes?.();
+  await startDefense(top[0][0],topScore);
+}
+async function finishDefense(eliminate){
+  if(!defenseCandidateUid) return alert("ไม่มีผู้เล่นในช่วงแก้ตัว");
+  const targetUid=defenseCandidateUid;
+  stopDefenseClock();
+  defenseControl.classList.add("hidden");
+  if(eliminate){
+    await eliminatePlayer(targetUid,"vote");
+    await update(ref(db,roomPath()),{
+      "public/status":"day",
+      "public/phase":{state:"day",night:currentNight||1,voteResult:"eliminated",eliminatedUid:targetUid,confirmedAt:Date.now()}
+    });
+    say(`${playerName(targetUid)} ถูกโหวตออก`);
+  }else{
+    await update(ref(db,roomPath()),{
+      "public/status":"day",
+      "public/phase":{state:"day",night:currentNight||1,voteResult:"pardoned",candidateUid:targetUid,confirmedAt:Date.now()}
+    });
+    say(`${playerName(targetUid)} ไม่ถูกกำจัด`);
+  }
+  defenseCandidateUid="";
+  defenseEndsAt=0;
 }
 
 function listenActions(night,phaseId){
@@ -369,6 +472,8 @@ copyBtn.addEventListener("click",copyJoinLink);
 openHostPlayerBtn?.addEventListener("click",openHostPlayer);
 startVoteBtn?.addEventListener("click",startVote);
 confirmVoteBtn?.addEventListener("click",confirmVote);
+eliminateAfterDefenseBtn?.addEventListener("click",()=>finishDefense(true));
+pardonAfterDefenseBtn?.addEventListener("click",()=>finishDefense(false));
 
 (async function boot(){
   if(!isFirebaseConfigured()){
