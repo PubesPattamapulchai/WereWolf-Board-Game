@@ -1,0 +1,1577 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b12">
+<title>Werewolf Moderator</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#080a10;
+  --surface:#11151f;
+  --surface-2:#171c28;
+  --surface-3:#202736;
+  --line:#2b3446;
+  --text:#f7f8fc;
+  --muted:#9aa6b8;
+  --red:#f04452;
+  --red-2:#bd2435;
+  --gold:#f2b84b;
+  --green:#45c486;
+  --blue:#6aa7ff;
+  --purple:#a78bfa;
+  --shadow:0 22px 70px rgba(0,0,0,.38);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  background:
+    radial-gradient(1000px 600px at 0% -10%,rgba(240,68,82,.16),transparent 55%),
+    radial-gradient(900px 520px at 100% 0%,rgba(242,184,75,.09),transparent 50%),
+    var(--bg);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(106,167,255,.32);outline-offset:2px
+}
+a{color:#a8caff}
+.hidden{display:none!important}
+.app{max-width:1240px;margin:auto;padding:20px 18px 110px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand-mark{
+  width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:28px;
+  background:linear-gradient(145deg,#2b1720,#19141c);border:1px solid #432531;
+  box-shadow:inset 0 1px rgba(255,255,255,.06),0 12px 30px rgba(240,68,82,.13)
+}
+.brand h1{font-size:clamp(22px,4vw,34px);line-height:1;margin:0;letter-spacing:-.03em}
+.brand p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.top-pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:7px 11px;border-radius:999px;
+  background:rgba(23,28,40,.86);border:1px solid var(--line);color:#dce3ef;font-size:13px;font-weight:700
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(69,196,134,.7)}
+.grid{display:grid;grid-template-columns:minmax(280px,.78fr) minmax(0,1.55fr);gap:18px;align-items:start}
+.card{
+  background:linear-gradient(180deg,rgba(23,28,40,.96),rgba(16,20,30,.98));
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)
+}
+.panel{padding:18px}
+.panel + .panel{margin-top:14px}
+.panel-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.panel-title{font-size:16px;font-weight:850;letter-spacing:-.01em}
+.panel-desc{margin-top:4px;color:var(--muted);font-size:13px;line-height:1.45}
+.step{
+  display:inline-grid;place-items:center;width:28px;height:28px;border-radius:10px;
+  background:#26202a;border:1px solid #46303b;color:#ffd5da;font-weight:900;font-size:13px;margin-right:8px
+}
+.field{
+  width:100%;min-height:44px;border:1px solid var(--line);border-radius:13px;
+  background:#0c1018;color:var(--text);padding:10px 12px
+}
+textarea.field{min-height:72px;resize:vertical;line-height:1.4}
+.field::placeholder{color:#657187}
+.field:hover{border-color:#3a465d}
+.search-wrap{position:relative}
+.search-wrap .field{padding-left:39px}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.55;pointer-events:none}
+.category-tabs{display:flex;gap:7px;overflow:auto;padding:10px 0 2px;scrollbar-width:none}
+.category-tabs::-webkit-scrollbar{display:none}
+.chip{
+  white-space:nowrap;border:1px solid var(--line);background:#111722;color:#b7c1d1;border-radius:999px;
+  padding:7px 10px;font-size:12px;font-weight:800
+}
+.chip.active{background:#2a2025;border-color:#5a3039;color:#ffdce0}
+.library-results{display:grid;gap:8px;margin-top:12px;max-height:420px;overflow:auto;padding-right:3px}
+.library-item{
+  display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;text-align:left;
+  border:1px solid #273043;background:#0d121b;border-radius:15px;padding:11px 12px;color:var(--text)
+}
+.library-item:hover{border-color:#44516a;background:#111824}
+.library-name{font-weight:800}
+.library-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.library-ability{
+  margin-top:7px;color:#d7deea;font-size:12px;line-height:1.42;
+  display:flex;gap:6px;align-items:flex-start
+}
+.library-ability .ability-icon{color:#f0b74b;flex:0 0 auto}
+.ability-kicker{
+  display:inline-flex;align-items:center;margin-right:6px;padding:2px 6px;border-radius:999px;
+  border:1px solid #3b465c;background:#171e2b;color:#c6d0df;font-size:10px;font-weight:900;
+  vertical-align:1px
+}
+.add-circle{
+  width:34px;height:34px;border-radius:12px;border:0;background:#242d3d;color:white;font-size:20px;font-weight:500
+}
+.empty-mini{padding:24px 10px;text-align:center;color:var(--muted);font-size:13px}
+.preset-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btn{
+  min-height:44px;border:0;border-radius:14px;padding:10px 14px;background:#273145;color:var(--text);
+  font-weight:850;transition:transform .13s ease,filter .13s ease,border-color .13s ease
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px) scale(.995)}
+.btn.primary{background:linear-gradient(145deg,#ef4452,#c7293b);box-shadow:0 9px 28px rgba(240,68,82,.20)}
+.btn.secondary{background:#1e2635;border:1px solid #344057}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:#cad3e2}
+.btn.danger{background:#2b151b;border:1px solid #52232c;color:#ffc9cf}
+.btn.big{min-height:56px;font-size:16px;border-radius:16px}
+.btn.icon{min-width:39px;min-height:39px;padding:7px 10px;border-radius:12px}
+.summary{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px
+}
+.metric{background:#0c1119;border:1px solid #283144;border-radius:15px;padding:11px}
+.metric strong{display:block;font-size:19px}
+.metric span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.balance-positive strong{color:#8be3b4}
+.balance-negative strong{color:#ff9ca5}
+.balance-neutral strong{color:#f5cc78}
+.role-list{display:grid;gap:10px}
+.role-card{
+  position:relative;border:1px solid #2a3447;border-radius:18px;background:#0d121b;overflow:hidden;
+  transition:border-color .15s ease,transform .15s ease
+}
+.role-card:hover{border-color:#3b4860}
+.role-card-head{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:11px;align-items:center;padding:12px}
+.order{
+  width:42px;height:42px;border-radius:14px;background:#1d2533;display:grid;place-items:center;
+  color:#dfe6f2;font-weight:900;font-variant-numeric:tabular-nums
+}
+.role-title{font-weight:900;letter-spacing:-.01em}
+.role-en{color:var(--muted);font-size:12px;margin-top:2px}
+.role-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.tag{
+  display:inline-flex;align-items:center;border-radius:999px;border:1px solid #344055;background:#1b2230;
+  color:#bfc9d8;padding:3px 7px;font-size:10px;font-weight:800
+}
+.tag.wolf{border-color:#5b2933;background:#2c161d;color:#ffc3ca}
+.tag.village{border-color:#254b3d;background:#14281f;color:#baf1d4}
+.tag.neutral{border-color:#56482c;background:#292316;color:#f7d89d}
+.role-quick{display:flex;gap:6px}
+.role-details{border-top:1px solid #242d3e;padding:12px;background:#0b1018}
+.role-details-grid{display:grid;grid-template-columns:1fr 165px;gap:9px}
+.role-note{font-size:12px;color:#8f9aad;line-height:1.45;margin-top:8px}
+.mode-select{width:100%}
+.drag-hint{color:#68758a;font-size:11px;text-align:right;margin-top:7px}
+.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.setting-card{background:#0c1119;border:1px solid #283144;border-radius:15px;padding:12px}
+.setting-card label.main{display:block;font-size:12px;color:#9eabba;font-weight:750;margin-bottom:7px}
+.toggle-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.toggle-copy strong{font-size:13px}
+.toggle-copy small{display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:3px}
+.switch{position:relative;width:45px;height:26px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#30394b;border-radius:999px;transition:.2s}
+.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:#c63343}
+.switch input:checked + .slider:before{transform:translateX(19px)}
+.sequence-preview{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.seq{
+  border:1px solid #303a4d;background:#131925;padding:5px 8px;border-radius:999px;font-size:11px;color:#c9d2df
+}
+.seq.off{opacity:.42;text-decoration:line-through}
+.help{font-size:12px;color:var(--muted);line-height:1.55}
+.sticky-start{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(8,10,16,0),rgba(8,10,16,.94) 22%,rgba(8,10,16,.98));
+  pointer-events:none
+}
+.sticky-inner{max-width:1240px;margin:auto;display:flex;justify-content:flex-end;gap:10px;pointer-events:auto}
+.start-info{
+  min-height:56px;display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:16px;
+  background:#111722;border:1px solid var(--line);color:#cbd4e2;font-size:13px
+}
+.start-info strong{color:white}
+
+
+/* Setup tabs */
+.setup-tabs{
+  position:sticky;top:10px;z-index:24;display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  max-width:620px;margin:0 auto 18px;padding:6px;border:1px solid var(--line);
+  border-radius:18px;background:rgba(12,16,24,.86);backdrop-filter:blur(18px);
+  box-shadow:0 12px 32px rgba(0,0,0,.22)
+}
+.setup-tab{
+  min-height:48px;border:0;border-radius:13px;background:transparent;color:#8f9bad;
+  font-weight:900;padding:9px 14px
+}
+.setup-tab span{display:block;font-size:11px;font-weight:700;opacity:.7;margin-top:2px}
+.setup-tab.active{
+  color:white;background:linear-gradient(180deg,#252d3d,#1b2230);
+  box-shadow:inset 0 1px rgba(255,255,255,.06),0 5px 16px rgba(0,0,0,.2)
+}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-settings-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(310px,.8fr);gap:18px;align-items:start}
+.selected-roles{
+  display:grid;gap:7px;max-height:265px;overflow:auto;padding:2px
+}
+.selected-role-card{
+  display:grid;grid-template-columns:minmax(0,1fr) 28px;gap:9px;align-items:start;
+  border:1px solid #303b50;background:#101620;border-radius:14px;padding:9px 9px 9px 11px
+}
+.selected-role-name{font-size:12px;font-weight:900;color:#e4eaf3}
+.selected-role-ability{margin-top:3px;color:#8f9bad;font-size:11px;line-height:1.4}
+.selected-remove{
+  width:28px;height:28px;border:0;border-radius:9px;background:#252e3e;color:#aeb9c9;line-height:1
+}
+.selected-remove:hover{background:#4a222b;color:#ffd2d7}
+.selected-empty{
+  width:100%;padding:16px;border:1px dashed #303a4e;border-radius:14px;text-align:center;
+  color:var(--muted);font-size:12px
+}
+.order-hero{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 15px;
+  margin-bottom:12px;border-radius:17px;border:1px solid #3a3040;
+  background:linear-gradient(135deg,rgba(240,68,82,.08),rgba(106,167,255,.04))
+}
+.order-hero strong{display:block;font-size:15px}
+.order-hero span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.order-arrow{font-size:24px;color:#c97681}
+.order-card{max-width:920px;margin:0 auto}
+.role-card.active-tonight{border-left:3px solid #d94755}
+.role-card.sleeping-role{opacity:.58}
+.role-action-preview{
+  padding:0 12px 11px 65px;color:#8f9bad;font-size:12px;line-height:1.45;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.role-editor{border-top:1px solid #242d3e}
+.role-editor>summary{
+  cursor:pointer;list-style:none;padding:10px 12px;color:#9ba8ba;font-size:12px;font-weight:800;
+  text-align:right;user-select:none
+}
+.role-editor>summary::-webkit-details-marker{display:none}
+.role-editor[open]>summary{color:#dce5f2}
+.role-editor .role-details{border-top:1px solid #242d3e}
+.order-footer-note{
+  margin-top:12px;padding:12px 14px;border-radius:15px;background:#0c1119;border:1px solid #273145;
+  color:#8f9bad;font-size:12px;line-height:1.5
+}
+@media(max-width:900px){
+  .tab-settings-grid{grid-template-columns:1fr}
+  .setup-tabs{top:6px}
+}
+@media(max-width:680px){
+  .setup-tabs{margin-bottom:12px;max-width:none}
+  .setup-tab{min-height:44px;padding:7px 9px;font-size:13px}
+  .setup-tab span{font-size:10px}
+  .role-action-preview{padding-left:11px;padding-right:11px}
+  .order-hero{align-items:flex-start}
+}
+
+
+.manual-wake{
+  margin:0 12px 11px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 11px;border-radius:13px;border:1px solid #493f2c;background:#211d14;color:#f0d69c;
+  font-size:12px;font-weight:800
+}
+.manual-wake label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.manual-wake input{width:18px;height:18px;accent-color:#f0b74b}
+.readiness{
+  margin:0 0 12px;padding:11px 13px;border-radius:15px;border:1px solid #304057;background:#101824;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px
+}
+.readiness strong{display:block;font-size:13px}
+.readiness span{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:3px}
+.readiness.ok{border-color:#27513f;background:#10231b}
+.readiness.warn{border-color:#59482a;background:#241f13}
+.readiness-badge{
+  flex:0 0 auto;padding:5px 8px;border-radius:999px;background:#1b2533;border:1px solid #34445b;
+  color:#dce5f2;font-size:10px;font-weight:900
+}
+.setting-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.setting-actions .btn{min-height:38px;font-size:12px}
+.play-tools{display:flex;gap:7px}
+.tool-btn{
+  min-width:36px;height:36px;border-radius:12px;border:1px solid #303a4e;background:#121925;color:#d7dfeb;
+  display:grid;place-items:center;font-size:15px
+}
+.tool-btn:hover{background:#1b2433}
+.estimate{font-variant-numeric:tabular-nums}
+
+
+/* Connected Game */
+.online-room-card{margin:0 0 16px}
+.online-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.online-title{display:flex;align-items:center;gap:9px;font-weight:900}
+.online-status{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:999px;
+  border:1px solid #354159;background:#121925;color:#aeb9c9;font-size:11px;font-weight:850
+}
+.online-status.connected{border-color:#28503f;background:#11241c;color:#aee8c8}
+.online-room-body{display:grid;grid-template-columns:220px minmax(0,1fr);gap:14px;margin-top:13px}
+.room-code-box{
+  border:1px solid #3c3140;background:linear-gradient(145deg,#20151b,#111722);
+  border-radius:17px;padding:13px
+}
+.room-code-label{color:#9da9ba;font-size:11px;font-weight:800}
+.room-code{
+  font-size:31px;line-height:1;font-weight:950;letter-spacing:.12em;margin:7px 0 10px;
+  font-variant-numeric:tabular-nums
+}
+.room-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.room-buttons .btn{min-height:38px;font-size:11px;padding:7px 9px}
+.online-empty{color:#7f8b9e;font-size:12px;line-height:1.5;padding:10px 0}
+.online-player-list{display:grid;gap:7px}
+.online-player{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;
+  border:1px solid #2c3649;background:#0c1119;border-radius:13px;padding:9px 10px
+}
+.online-player-main{min-width:0}
+.online-player-name{font-size:12px;font-weight:900;display:flex;align-items:center;gap:7px}
+.online-player-sub{font-size:10px;color:#8490a2;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.presence{width:7px;height:7px;border-radius:50%;background:#596477;display:inline-block}
+.presence.on{background:#45c486;box-shadow:0 0 8px rgba(69,196,134,.55)}
+.alive-btn{
+  min-height:32px;border:1px solid #354057;background:#171e2a;color:#c7d1df;border-radius:10px;
+  padding:5px 8px;font-size:10px;font-weight:850
+}
+.alive-btn.dead{background:#2a161b;border-color:#542832;color:#ffc2c9}
+.online-actions{
+  max-width:720px;margin:0 auto 18px;border:1px solid #344159;background:#0d131d;border-radius:17px;
+  padding:11px 13px;text-align:left
+}
+.online-actions-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.online-actions-head strong{font-size:12px}
+.online-actions-head span{font-size:10px;color:#92a0b4}
+.online-action-list{display:grid;gap:6px}
+.online-action-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 8px;
+  background:#131a26;border-radius:10px;font-size:11px
+}
+.online-action-row b{color:#e5ebf4}
+.online-action-row span{color:#b8c3d2;text-align:right}
+@media(max-width:720px){
+  .online-room-body{grid-template-columns:1fr}
+  .room-code-box{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+  .room-code-box .room-buttons{grid-column:1/-1}
+}
+
+/* Play mode */
+#playView{display:none}
+.play-shell{
+  min-height:100dvh;padding:16px max(16px,env(safe-area-inset-left)) calc(18px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 500px at 50% -5%,rgba(240,68,82,.18),transparent 60%),
+    radial-gradient(700px 500px at 100% 100%,rgba(104,79,181,.12),transparent 55%),
+    #080a10
+}
+.play-top{display:flex;align-items:center;justify-content:space-between;gap:14px;max-width:1040px;width:100%;margin:0 auto}
+.play-brand{display:flex;align-items:center;gap:9px;color:#d6deea;font-size:13px;font-weight:800}
+.play-brand .mini-moon{width:31px;height:31px;border-radius:11px;display:grid;place-items:center;background:#201820}
+.play-meta{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.play-progress{max-width:1040px;width:100%;height:6px;background:#1d2431;border-radius:999px;overflow:hidden;margin:13px auto 0}
+.play-progress>div{height:100%;width:0;background:linear-gradient(90deg,#eb4554,#f0a74c);transition:width .25s}
+.stage{
+  flex:1;max-width:980px;width:100%;margin:auto;display:grid;place-items:center;padding:24px 0
+}
+.stage-inner{width:100%;text-align:center}
+.state-label{
+  display:inline-flex;align-items:center;gap:8px;border:1px solid #49303a;background:#24161c;color:#ffd4d9;
+  border-radius:999px;padding:7px 12px;font-size:12px;font-weight:900;letter-spacing:.05em
+}
+.state-label .pulse{width:7px;height:7px;border-radius:50%;background:#f05a67;box-shadow:0 0 0 0 rgba(240,90,103,.5);animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(240,90,103,0)}100%{box-shadow:0 0 0 0 rgba(240,90,103,0)}}
+.current-role{
+  font-size:clamp(42px,9vw,90px);line-height:.96;letter-spacing:-.055em;font-weight:950;
+  margin:18px auto 9px;max-width:900px;text-wrap:balance
+}
+.instruction{font-size:clamp(21px,3.5vw,31px);font-weight:850;color:#dfe6f1}
+.action-panel{
+  max-width:720px;margin:18px auto 0;padding:15px 18px;border-radius:18px;border:1px solid #2c3649;
+  background:rgba(16,21,31,.82);color:#c8d1df;font-size:clamp(15px,2.3vw,18px);line-height:1.55;min-height:58px
+}
+.timer-zone{display:grid;place-items:center;margin:24px 0 20px}
+.timer{
+  width:min(286px,62vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:conic-gradient(#ef4856 var(--progress,100%),#202633 0);
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.25))
+}
+.timer:before{content:"";position:absolute;inset:12px;border-radius:50%;background:#0c1018;border:1px solid #293246}
+.timer:after{content:"วินาที";position:absolute;z-index:2;top:64%;font-size:12px;color:#7f8a9d;font-weight:800;letter-spacing:.08em}
+.seconds{position:relative;z-index:2;font-size:clamp(70px,15vw,116px);line-height:1;font-weight:950;font-variant-numeric:tabular-nums;letter-spacing:-.06em}
+.timer.urgent{background:conic-gradient(#f0b74b var(--progress,100%),#28261f 0)}
+.timer.critical{background:conic-gradient(#ff384b var(--progress,100%),#29171c 0);animation:critical .75s ease-in-out infinite alternate}
+@keyframes critical{to{transform:scale(1.018)}}
+.next-card{
+  max-width:520px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;gap:8px;
+  color:#8793a6;font-size:12px
+}
+.next-card strong{color:#c7d0de}
+.play-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:9px;max-width:560px;margin:auto}
+.play-actions .btn{min-height:54px}
+.stop-line{margin-top:10px}
+.stop-line .btn{min-height:42px;font-size:12px}
+.paused-banner{
+  position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(4,6,10,.72);backdrop-filter:blur(8px)
+}
+.paused-card{padding:25px 28px;border-radius:22px;border:1px solid #384358;background:#121722;text-align:center;box-shadow:var(--shadow)}
+.paused-card .emoji{font-size:40px}
+.paused-card strong{display:block;font-size:24px;margin:7px 0 3px}
+.paused-card span{color:var(--muted);font-size:13px}
+.done-wrap{text-align:center;max-width:760px;margin:auto}
+.sun{font-size:72px;filter:drop-shadow(0 0 28px rgba(242,184,75,.28))}
+.done-title{font-size:clamp(38px,8vw,72px);line-height:1;font-weight:950;letter-spacing:-.05em;margin:12px 0}
+.done-sub{color:#c9d1de;font-size:19px}
+.done-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.done-actions .btn{min-width:160px}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:88px;transform:translate(-50%,15px);z-index:60;
+  padding:10px 14px;border-radius:999px;background:#eff3f9;color:#10141c;font-weight:850;font-size:12px;
+  opacity:0;pointer-events:none;transition:.22s
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .library-results{max-height:300px}
+}
+@media(max-width:680px){
+  .app{padding:14px 12px 112px}
+  .topbar{align-items:flex-start}
+  .top-pills{display:none}
+  .brand-mark{width:46px;height:46px;border-radius:15px}
+  .panel{padding:14px}
+  .summary{grid-template-columns:repeat(3,1fr)}
+  .metric{padding:9px}
+  .metric strong{font-size:17px}
+  .role-card-head{grid-template-columns:38px minmax(0,1fr);padding:11px}
+  .order{width:38px;height:38px}
+  .role-quick{grid-column:1/-1;justify-content:flex-end}
+  .role-details-grid{grid-template-columns:1fr}
+  .settings-grid{grid-template-columns:1fr}
+  .preset-row{grid-template-columns:1fr}
+  .sticky-inner{display:grid;grid-template-columns:1fr}
+  .start-info{display:none}
+  .sticky-inner .btn.big{width:100%}
+  .current-role{font-size:clamp(40px,13vw,68px)}
+  .play-shell{padding-top:12px}
+  .play-meta .pill:nth-child(2){display:none}
+  .timer{width:min(250px,62vw)}
+  .play-actions{grid-template-columns:1fr 1.25fr;width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<main id="setupView" class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">🌙</div>
+      <div>
+        <h1>Werewolf Moderator</h1>
+        <p>ตั้งเกมให้เสร็จเร็ว แล้วปล่อยให้ระบบคุม Night Phase</p>
+      </div>
+    </div>
+    <div class="top-pills">
+      <span class="pill"><span class="dot"></span><span id="headerRoleCount">0 Role</span></span>
+      <span class="pill">Night <span id="headerNight">1</span></span>
+      <span class="pill"><span id="headerDuration">30</span> วิ / Role</span>
+    </div>
+  </header>
+
+  
+  <nav class="setup-tabs" aria-label="ขั้นตอนตั้งค่าเกม">
+    <button class="setup-tab active" data-tab="settings">
+      1. ตั้งค่าเกม
+      <span>Role • เวลา • ตัวเลือก</span>
+    </button>
+    <button class="setup-tab" data-tab="order">
+      2. ลำดับการเรียก
+      <span id="orderTabCount">0 Role ตื่นคืนนี้</span>
+    </button>
+  </nav>
+
+  <section class="card panel online-room-card">
+    <div class="online-head">
+      <div>
+        <div class="online-title">📡 Online Room <span id="onlineStatus" class="online-status">ยังไม่ได้สร้างห้อง</span></div>
+        <div class="panel-desc">ให้ผู้เล่นเปิด player.html แล้วเข้าด้วย Room Code • Moderator แจก Role จากชุดที่เลือกไว้</div>
+      </div>
+      <button id="createRoomBtn" class="btn primary" type="button">สร้างห้องออนไลน์</button>
+    </div>
+
+    <div id="onlineRoomBody" class="online-room-body hidden">
+      <div class="room-code-box">
+        <div>
+          <div class="room-code-label">ROOM CODE</div>
+          <div id="roomCodeText" class="room-code">—</div>
+        </div>
+        <div class="room-buttons">
+          <button id="copyJoinBtn" class="btn secondary" type="button">คัดลอกลิงก์</button>
+          <button id="assignRolesBtn" class="btn primary" type="button">สุ่มแจก Role</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel-desc" style="margin:0 0 7px">ผู้เล่นในห้อง <b id="onlinePlayerCount" style="color:#e7edf6">0</b> คน</div>
+        <div id="onlinePlayerList" class="online-player-list">
+          <div class="online-empty">รอผู้เล่นเข้าห้อง…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="tab-settings" class="tab-panel active">
+    <div class="tab-settings-grid">
+      <div>
+        <section class="card panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">เลือก Role ที่ใช้ในเกม</div>
+              <div class="panel-desc">ค้นหาชื่อไทยหรืออังกฤษ แล้วกด + เพื่อเพิ่ม Role</div>
+            </div>
+          </div>
+
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="roleSearch" class="field" type="search" placeholder="ค้นหา เช่น หมาป่า, Seer, Witch…" autocomplete="off">
+          </div>
+          <div id="categoryTabs" class="category-tabs" aria-label="หมวด Role"></div>
+          <div id="libraryResults" class="library-results"></div>
+
+          <div class="preset-row">
+            <button id="osPresetBtn" class="btn secondary">ใช้ชุดเริ่มต้น</button>
+            <button id="addRoleBtn" class="btn ghost">+ Custom Role</button>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="card panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">ตั้งค่า Night Phase</div>
+              <div class="panel-desc">ตั้งครั้งเดียวก่อนเริ่ม จากนั้นไปตรวจลำดับใน Tab 2</div>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <div class="setting-card">
+              <label class="main" for="nightInput">คืนที่</label>
+              <input id="nightInput" class="field" type="number" min="1" max="99" value="1">
+            </div>
+            <div class="setting-card">
+              <label class="main" for="durationInput">เวลาต่อ Role</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input id="durationInput" class="field" type="number" min="5" max="180" value="30">
+                <span style="color:var(--muted);font-size:12px">วิ</span>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="toggle-row">
+                <div class="toggle-copy">
+                  <strong>เสียงประกาศ</strong>
+                  <small>เรียกชื่อ Role อัตโนมัติ</small>
+                </div>
+                <label class="switch">
+                  <input id="voiceToggle" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-actions">
+                <button id="testVoiceBtn" class="btn ghost" type="button">🔊 ทดสอบเสียง</button>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="toggle-row">
+                <div class="toggle-copy">
+                  <strong>ไปต่ออัตโนมัติ</strong>
+                  <small>ครบเวลาแล้วเรียก Role ถัดไป</small>
+                </div>
+                <label class="switch">
+                  <input id="autoToggle" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="toggle-row">
+                <div class="toggle-copy">
+                  <strong>เตือนก่อนหมดเวลา</strong>
+                  <small>มีเสียงสั้น + สั่นที่ 10 และ 5 วินาที</small>
+                </div>
+                <label class="switch">
+                  <input id="cueToggle" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="setting-card" style="grid-column:1/-1">
+              <div class="toggle-row">
+                <div class="toggle-copy">
+                  <strong>คืนแรกแบบ Online Station</strong>
+                  <small>คืนแรกหมาป่าลืมตาเพื่อจำกัน แต่ยังไม่เลือกฆ่า</small>
+                </div>
+                <label class="switch">
+                  <input id="firstNightSafeToggle" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Role ที่เลือกแล้ว</div>
+              <div class="panel-desc"><span id="selectedRoleCount">0</span> Role ในเกมนี้</div>
+            </div>
+          </div>
+          <div id="selectedRolesPreview" class="selected-roles"></div>
+        </section>
+
+        <section class="card panel">
+          <details>
+            <summary style="cursor:pointer;font-weight:850">วิธีใช้และแหล่งอ้างอิง</summary>
+            <div class="help" style="margin-top:10px">
+              <b>ทุกคืน</b> = เรียกอัตโนมัติทุก Night • <b>คืนแรก</b> = เรียกเฉพาะ Night 1 •
+              <b>ตามเงื่อนไข</b> = Moderator เปิดใช้เองเมื่อถึงเงื่อนไข • <b>ไม่ต้องลืมตา</b> = ระบบข้าม
+              <br><br>
+              Keyboard: <b>Space</b> พัก/เล่นต่อ • <b>→</b> ข้าม Role
+              <br><br>
+              References:
+              <a href="https://werewolf-the-game.fandom.com/wiki/List_of_Roles" target="_blank" rel="noreferrer">Werewolf the Game Wiki</a>
+              •
+              <a href="https://www.online-station.net/entertainment/690636" target="_blank" rel="noreferrer">Online Station</a>
+            </div>
+          </details>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-order" class="tab-panel">
+    <div class="order-card">
+      <div class="card panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">ลำดับการเรียกในคืนนี้</div>
+            <div class="panel-desc">ระบบจะเรียกจากบนลงล่าง ใช้ ↑ ↓ เพื่อจัดลำดับ แล้วกด “แก้ Action” เฉพาะ Role ที่ต้องการ</div>
+          </div>
+          <button id="resetBtn" class="btn ghost" style="min-height:38px;padding:7px 10px;font-size:12px">รีเซ็ต</button>
+        </div>
+
+        <div class="summary">
+          <div class="metric"><strong id="roleCountMetric">0</strong><span>Role ทั้งหมด</span></div>
+          <div class="metric"><strong id="wakeCountMetric">0</strong><span>ตื่นคืนนี้</span></div>
+          <div id="balanceMetric" class="metric balance-neutral"><strong id="balanceTotal">0</strong><span>แต้มสมดุล</span></div>
+        </div>
+        <div id="readinessBox" class="readiness">
+          <div>
+            <strong id="readinessTitle">กำลังตรวจความพร้อม</strong>
+            <span id="readinessText">ระบบจะสรุปสิ่งที่ควรเช็กก่อนเริ่ม Night Phase</span>
+          </div>
+          <div id="readinessBadge" class="readiness-badge">CHECK</div>
+        </div>
+
+        <div class="order-hero">
+          <div>
+            <strong>🌙 ระบบจะเรียกตามลำดับนี้</strong>
+            <span>Role ที่จางลงจะไม่ถูกเรียกในคืนนี้</span>
+          </div>
+          <div class="order-arrow">↓</div>
+        </div>
+
+        <div id="roleList" class="role-list"></div>
+        <div id="emptyRoles" class="empty-mini hidden">ยังไม่มี Role — กลับไป Tab “ตั้งค่าเกม” เพื่อเพิ่ม Role</div>
+
+        <div class="order-footer-note">
+          การเปลี่ยนลำดับมีผลทันที • Role แบบ “ตามเงื่อนไข” สามารถเปิด “เรียกคืนนี้” ได้เฉพาะ Night นี้
+        </div>
+
+        <div style="margin-top:15px">
+          <div class="panel-desc" style="margin:0 0 7px">สรุปลำดับที่จะตื่นคืนนี้</div>
+          <div id="sequencePreview" class="sequence-preview"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sticky-start">
+    <div class="sticky-inner">
+      <div class="start-info">
+        <span id="flowHint">ขั้นตอนถัดไป</span>
+        <strong id="startSummary">0 Role</strong>
+      </div>
+      <button id="startBtn" class="btn primary big">ตรวจลำดับการเรียก →</button>
+    </div>
+  </div>
+
+</main>
+
+<section id="playView">
+  <div class="play-shell">
+    <div class="play-top">
+      <div class="play-brand"><span class="mini-moon">🌙</span>Werewolf Moderator</div>
+      <div class="play-meta">
+        <span class="pill">Night <span id="playNight">1</span></span>
+        <span class="pill"><span id="stepLabel">1 / 1</span></span>
+        <div class="play-tools">
+          <button id="fullscreenBtn" class="tool-btn" type="button" title="เต็มจอ" aria-label="เต็มจอ">⛶</button>
+        </div>
+      </div>
+    </div>
+    <div class="play-progress"><div id="progressBar"></div></div>
+
+    <div id="playingState" class="stage">
+      <div class="stage-inner">
+        <div id="stateLabel" class="state-label"><span class="pulse"></span><span id="stateText">กำลังเรียก</span></div>
+        <div id="currentRole" class="current-role">มนุษย์หมาป่า</div>
+        <div id="instruction" class="instruction">ลืมตา</div>
+        <div id="actionText" class="action-panel">กำลังเรียก Role…</div>
+
+        <div class="timer-zone">
+          <div id="timerCircle" class="timer" style="--progress:100%">
+            <div id="seconds" class="seconds">30</div>
+          </div>
+        </div>
+
+        
+        <div id="onlineActionPanel" class="online-actions hidden">
+          <div class="online-actions-head">
+            <strong>📲 คำตอบจากผู้เล่น</strong>
+            <span id="onlineActionProgress">0 / 0 ส่งแล้ว</span>
+          </div>
+          <div id="onlineActionList" class="online-action-list"></div>
+        </div>
+
+        <div class="next-card">ถัดไป <strong id="nextRole">—</strong></div>
+
+        <div class="play-actions">
+          <button id="pauseBtn" class="btn secondary big">⏸ พัก</button>
+          <button id="skipBtn" class="btn primary big">ถัดไป →</button>
+        </div>
+        <div class="stop-line">
+          <button id="stopBtn" class="btn ghost">จบ Night Phase</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="doneState" class="stage hidden">
+      <div class="done-wrap">
+        <div class="sun">☀️</div>
+        <div class="done-title">จบช่วงกลางคืน</div>
+        <div class="done-sub">ทุกคนลืมตาได้</div>
+        <div class="done-actions">
+          <button id="againBtn" class="btn primary big">เริ่มคืนถัดไป</button>
+          <button id="editBtn" class="btn secondary big">กลับไปตั้งค่า</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="pausedOverlay" class="paused-banner hidden">
+  <div class="paused-card">
+    <div class="emoji">⏸️</div>
+    <strong>พักเวลา</strong>
+    <span>แตะ “เล่นต่อ” หรือกด Space</span>
+  </div>
+</div>
+<div id="toast" class="toast" role="status"></div>
+
+<script>
+(() => {
+  const ROLE_LIBRARY = [
+    // Online Station: Villager side
+    {name:"Villager",th:"ชาวบ้าน",cat:"Villagers",points:1,source:"Online Station",mode:"never",action:"ไม่มี Night Action",note:"ช่วยค้นหาและโหวตกำจัดมนุษย์หมาป่า"},
+    {name:"Seer",th:"เทพพยากรณ์",cat:"Villagers",points:7,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนเพื่อตรวจสอบว่าเป็นมนุษย์หมาป่าหรือไม่"},
+    {name:"Spellcaster",th:"จอมเวท",cat:"Villagers",points:1,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนให้ห้ามพูดในวันถัดไป"},
+    {name:"Cupid",th:"กามเทพ",cat:"Villagers",points:-3,source:"Online Station + Wiki",mode:"first",action:"เลือกผู้เล่น 2 คนให้เป็นคู่กัน",note:"ถ้าคนหนึ่งถูกกำจัด อีกคนถูกกำจัดตาม"},
+    {name:"Bodyguard",th:"บอดี้การ์ด",cat:"Villagers",points:3,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนที่จะได้รับการปกป้องคืนนี้",note:"เลือกตัวเองไม่ได้ และห้ามป้องกันคนเดิม 2 คืนติด"},
+    {name:"Aura Seer",th:"ญาณทิพย์",cat:"Villagers",points:3,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนเพื่อตรวจว่าเป็นตัวละครพิเศษหรือไม่"},
+    {name:"Drunk",th:"ขี้เมา",cat:"Villagers",points:4,source:"Online Station",mode:"manual",action:"เมื่อถึงเวลาตามกติกา ให้ Moderator เปิดเผยบทบาทจริง",note:"บทความระบุว่าหลังคืนที่ 3 จะรู้บทบาทจริง"},
+    {name:"Prince",th:"เจ้าชาย",cat:"Villagers",points:3,source:"Online Station",mode:"never",action:"ไม่มี Night Action",note:"รอดจากการถูกโหวตกำจัดในช่วงกลางวันหนึ่งครั้งตามกติกา"},
+    {name:"Priest",th:"นักบวช",cat:"Villagers",points:3,source:"Online Station",mode:"manual",action:"เลือกผู้เล่น 1 คนให้รอดพ้นจากการกำจัดหนึ่งครั้ง",note:"ใช้ได้หนึ่งครั้งต่อเกม"},
+    {name:"P.I.",th:"นักสืบเรื่องลี้ลับ",cat:"Villagers",points:3,source:"Online Station",mode:"manual",action:"เลือกผู้เล่น 1 คนเพื่อตรวจเขาและคนซ้าย/ขวาว่ามีหมาป่าปะปนหรือไม่",note:"ใช้ได้หนึ่งครั้งต่อเกม"},
+    {name:"Troublemaker",th:"ตัวป่วน",cat:"Villagers",points:-3,source:"Online Station",mode:"manual",action:"ใช้ความสามารถให้วันรุ่งขึ้นมีการโหวตกำจัด 2 คน",note:"ใช้ได้หนึ่งครั้งต่อเกม"},
+    {name:"Witch",th:"แม่มด",cat:"Villagers",points:4,source:"Online Station + Wiki",mode:"every",action:"ตัดสินใจว่าจะใช้พลังปกป้องหรือกำจัดผู้เล่นหรือไม่",note:"บทความระบุว่าแต่ละพลังใช้ได้อย่างละหนึ่งครั้งต่อเกม"},
+    {name:"Old Hag",th:"แม่หมอ",cat:"Villagers",points:1,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนให้ออกจากหมู่บ้านหนึ่งวัน"},
+    {name:"Apprentice Seer",th:"ศิษย์เทพพยากรณ์",cat:"Villagers",points:4,source:"Online Station + Wiki",mode:"manual",action:"เมื่อ Seer ถูกกำจัด ให้เปลี่ยนมาทำหน้าที่ตรวจผู้เล่นทุกคืน"},
+    {name:"Mayor",th:"นายกเทศมนตรี",cat:"Villagers",points:2,source:"Online Station",mode:"never",action:"ไม่มี Night Action",note:"เสียงโหวตนับเป็น 2 เสียง"},
+    {name:"Hunter",th:"นายพราน",cat:"Villagers",points:3,source:"Online Station + Wiki",mode:"never",action:"ความสามารถทำงานเมื่อถูกกำจัด"},
+    {name:"Disease",th:"ผู้ป่วยติดเชื้อ",cat:"Villagers",points:3,source:"Online Station",mode:"never",action:"ไม่มี Night Action",note:"ถ้าถูกหมาป่ากำจัด หมาป่าจะไม่ได้เลือกเหยื่อคืนถัดไป"},
+    {name:"Pacifist",th:"ผู้รักสันติ",cat:"Villagers",points:-1,source:"Online Station",mode:"never",action:"ไม่มี Night Action"},
+    {name:"Ghost",th:"พรายกระซิบ",cat:"Villagers",points:2,source:"Online Station",mode:"first",action:"ทำขั้นตอนของ Ghost ตามกติกาที่ใช้",note:"บทความระบุว่าถูกกำจัดตั้งแต่คืนแรกและส่งสารวันละหนึ่งตัวอักษร"},
+    {name:"Mason",th:"ภราดรแห่งเมสัน",cat:"Villagers",points:2,source:"Online Station + Wiki",mode:"first",action:"Mason ลืมตาเพื่อมองหาภราดรแห่งเมสันด้วยกัน",note:"ควรมี Mason อย่างน้อย 2 คน"},
+    {name:"Doppelganger",th:"ภูตจำแลง",cat:"Villagers",points:-2,source:"Online Station",mode:"first",action:"เลือกผู้เล่น 1 คนเป็นเป้าหมายของการสวมรอย"},
+    {name:"Doppelgänger",th:"Doppelgänger",cat:"Neutral",points:null,source:"Wiki",mode:"first",action:"เลือก/ตรวจเป้าหมายเริ่มต้นตามกติกา Doppelgänger"},
+    {name:"Lycan",th:"ลูกครึ่งมนุษย์หมาป่า",cat:"Villagers",points:-1,source:"Online Station",mode:"never",action:"ไม่มี Night Action",note:"อยู่ฝ่ายชาวบ้านแต่ Seer จะเห็นเป็นหมาป่า"},
+    {name:"Tough Guy",th:"หนุ่มถึก",cat:"Villagers",points:3,source:"Online Station",mode:"never",action:"ไม่มี Night Action"},
+    {name:"Villager Idiot",th:"ไอ้ทึ่ม",cat:"Villagers",points:2,source:"Online Station",mode:"never",action:"ไม่มี Night Action"},
+
+    // Online Station: Werewolf side
+    {name:"Werewolf",th:"มนุษย์หมาป่า",cat:"Werewolves",points:-6,source:"Online Station + Wiki",mode:"every",action:"ฝูงหมาป่าเลือกผู้เล่น 1 คนที่จะถูกกำจัดคืนนี้",firstAction:"ลืมตาเพื่อมองและจำมนุษย์หมาป่าด้วยกัน — คืนแรกยังไม่เลือกฆ่า"},
+    {name:"Lone Wolf",th:"มนุษย์หมาป่าเดียวดาย",cat:"Werewolves",points:-5,source:"Online Station",mode:"every",action:"ตื่นพร้อมฝูงหมาป่าและทำขั้นตอนเลือกเป้าหมายตามกติกา",firstAction:"ลืมตาเพื่อมองและจำฝูงหมาป่า — คืนแรกยังไม่เลือกฆ่า"},
+    {name:"The Lone Wolf",th:"The Lone Wolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"ทำความสามารถของ The Lone Wolf ตามกติกาที่ใช้"},
+    {name:"Wolf Cub",th:"ลูกมนุษย์หมาป่า",cat:"Werewolves",points:-8,source:"Online Station + Wiki",mode:"every",action:"ตื่นพร้อมฝูงหมาป่าและร่วมเลือกเป้าหมาย",firstAction:"ลืมตาเพื่อมองและจำฝูงหมาป่า — คืนแรกยังไม่เลือกฆ่า",note:"หากถูกกำจัด ฝ่ายหมาป่าอาจได้กำจัด 2 คนในคืนถัดไปตามกติกา"},
+    {name:"Minion",th:"สมุนรับใช้",cat:"Werewolves",points:-6,source:"Online Station + Wiki",mode:"first",action:"ลืมตาเพื่อดูว่าใครบ้างเป็นมนุษย์หมาป่า"},
+    {name:"Sorcerer",th:"นางปีศาจ",cat:"Werewolves",points:-3,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนเพื่อตรวจว่าเป็น Seer หรือไม่"},
+    {name:"The Sorcerer",th:"The Sorcerer",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"ทำความสามารถของ The Sorcerer ตามกติกาที่ใช้"},
+    {name:"Hoodlum",th:"อันธพาล",cat:"Werewolves",points:0,source:"Online Station",mode:"first",action:"เลือกผู้เล่น 2 คนเป็นเป้าหมายเงื่อนไขชัยชนะ"},
+    {name:"Cursed",th:"ผู้ต้องคำสาป",cat:"Werewolves",points:-3,source:"Online Station",mode:"never",action:"ไม่มี Night Action จนกว่าจะเกิดเงื่อนไขเปลี่ยนฝ่าย"},
+    {name:"Alpha Wolf",th:"มนุษย์หมาป่าจ่าฝูง",cat:"Werewolves",points:-9,source:"Online Station",mode:"manual",action:"หลังมีหมาป่าถูกกำจัดในตอนกลางวัน เลือกว่าจะเปลี่ยนเหยื่อเป็นหมาป่าใหม่แทนการฆ่าหรือไม่",note:"ใช้ได้หนึ่งครั้งต่อเกม"},
+    {name:"Alpha Werewolf",th:"Alpha Werewolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"ทำความสามารถของ Alpha Werewolf ตามกติกาที่ใช้"},
+    {name:"Big Bad Wolf",th:"Big Bad Wolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"ทำความสามารถของ Big Bad Wolf ตามกติกาที่ใช้"},
+    {name:"Mystic Wolf",th:"Mystic Wolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"ทำความสามารถของ Mystic Wolf ตามกติกาที่ใช้"},
+    {name:"Omega Wolf",th:"Omega Wolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"ทำความสามารถของ Omega Wolf ตามกติกาที่ใช้"},
+    {name:"Poisoner",th:"Poisoner",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"เลือก/ใช้พิษตามกติกา Poisoner"},
+    {name:"Fruit Brute",th:"Fruit Brute",cat:"Werewolves",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"The Fallen Angel",th:"The Fallen Angel",cat:"Werewolves",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"Confused Wolf",th:"Confused Wolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"เข้าร่วมช่วงหมาป่า/ทำความสามารถตามกติกาที่ใช้"},
+    {name:"German shepherd",th:"German shepherd",cat:"Werewolves",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"The Remorseful Werewolf",th:"The Remorseful Werewolf",cat:"Werewolves",points:null,source:"Wiki",mode:"every",action:"เข้าร่วมช่วงหมาป่าตามกติกาที่ใช้"},
+
+    // Neutral / other
+    {name:"Moderator",th:"ผู้ดำเนินเกม",cat:"Neutral",points:0,source:"Online Station",mode:"never",action:"ผู้ควบคุมและดำเนินเกม"},
+    {name:"The Moderator",th:"The Moderator",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ผู้ดำเนินเกม"},
+    {name:"Tanner",th:"ยาจก",cat:"Neutral",points:-2,source:"Online Station + Wiki",mode:"never",action:"ไม่มี Night Action",note:"ชนะทันทีหากถูกกำจัดตามกติกาที่บทความอธิบาย"},
+    {name:"Vampire",th:"แวมไพร์",cat:"Neutral",points:-7,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนเป็นเป้าหมายของ Vampire"},
+    {name:"Cult Leader",th:"เจ้าลัทธิ",cat:"Neutral",points:1,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนให้เข้าร่วมลัทธิ"},
+    {name:"Poisoner",th:"Poisoner",cat:"Neutral",points:null,source:"Wiki",mode:"every",action:"เลือก/ใช้พิษตามกติกา Poisoner"},
+    {name:"Turncoat",th:"Turncoat",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"Bloody Mary",th:"Bloody Mary",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"Vengeful ghost",th:"Vengeful ghost",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"Chef",th:"Chef",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"Enchantress",th:"Enchantress",cat:"Neutral",points:null,source:"Wiki",mode:"every",action:"ใช้ความสามารถของ Enchantress ตามกติกาที่ใช้"},
+    {name:"Arsonist",th:"Arsonist",cat:"Neutral",points:null,source:"Wiki",mode:"every",action:"เลือกเป้าหมาย/ใช้ความสามารถของ Arsonist ตามกติกาที่ใช้"},
+    {name:"Thespian",th:"Thespian",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+    {name:"Orphan",th:"Orphan",cat:"Neutral",points:null,source:"Wiki",mode:"first",action:"ทำความสามารถเริ่มต้นของ Orphan ตามกติกาที่ใช้"},
+    {name:"The Guardian Angel",th:"The Guardian Angel",cat:"Neutral",points:null,source:"Wiki",mode:"every",action:"เลือก/ปกป้องเป้าหมายตามกติกา Guardian Angel"},
+    {name:"The Priest",th:"The Priest",cat:"Neutral",points:null,source:"Wiki",mode:"never",action:"ตั้งค่า Night Action ตาม house rules"},
+
+    // Hunting Party from Online Station
+    {name:"Revealer",th:"ผู้เผยตัวตน",cat:"Additional",points:4,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนเพื่อตรวจและใช้ความสามารถ Revealer"},
+    {name:"Mentalist",th:"นักสะกดจิต",cat:"Additional",points:6,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 2 คนเพื่อตรวจว่าอยู่ฝ่ายเดียวกันหรือไม่"},
+    {name:"Huntress",th:"พรานหญิง",cat:"Additional",points:3,source:"Online Station",mode:"manual",action:"เลือกกำจัดผู้เล่น 1 คนในช่วงกลางคืน",note:"ใช้ได้หนึ่งครั้งต่อเกม"},
+    {name:"Mad Bomber",th:"มือระเบิดพลีชีพ",cat:"Additional",points:-2,source:"Online Station",mode:"never",action:"ไม่มี Night Action",note:"เมื่อตาย ผู้เล่นซ้ายและขวาถูกกำจัดตามกติกา"},
+    {name:"Mystic Seer",th:"เทพผู้รู้แจ้ง",cat:"Additional",points:9,source:"Online Station",mode:"every",action:"เลือกผู้เล่น 1 คนเพื่อตรวจบทบาท"},
+    {name:"Sheriff",th:"Sheriff",cat:"Additional",points:null,source:"Wiki",mode:"never",action:"Additional Role — ตั้งค่า Night Action ตามกติกาที่ใช้"},
+    {name:"Amnesiac",th:"Amnesiac",cat:"Additional",points:null,source:"Wiki",mode:"never",action:"Additional Role — ตั้งค่า Night Action ตามกติกาที่ใช้"}
+  ];
+
+
+  const ROLE_ABILITIES = {
+    // Villagers / Online Station
+    "Villager":"ไม่มีพลังกลางคืน • ช่วยวิเคราะห์และโหวตหาหมาป่า",
+    "Seer":"เลือกเช็ค 1 คน • รู้ว่าเป็นมนุษย์หมาป่าหรือไม่",
+    "Spellcaster":"เลือก 1 คน • คนนั้นห้ามพูดในวันถัดไป",
+    "Cupid":"คืนแรกเลือก 2 คน • ผูกเป็นคู่รักและชะตาเชื่อมกัน",
+    "Bodyguard":"เลือกป้องกัน 1 คน • กันการถูกกำจัดในคืนนั้น",
+    "Aura Seer":"เลือกเช็ค 1 คน • รู้ว่าเป็น Role พิเศษหรือไม่",
+    "Drunk":"หลังคืนที่ 3 • Moderator เปิดเผย Role จริงให้รู้",
+    "Prince":"ถูกโหวตกำจัดครั้งแรก • เปิด Role แล้วรอด",
+    "Priest":"เลือกคุ้มครอง 1 คน • กันการถูกกำจัด 1 ครั้งต่อเกม",
+    "P.I.":"เลือก 1 คน • เช็คเป้าหมาย+ซ้าย+ขวาว่ามีหมาป่าหรือไม่",
+    "Troublemaker":"ใช้ 1 ครั้ง/เกม • วันถัดไปต้องโหวตกำจัด 2 คน",
+    "Witch":"มียาช่วย 1 ครั้ง + ยากำจัด 1 ครั้ง • เลือกใช้ตอนกลางคืน",
+    "Old Hag":"เลือก 1 คน • ให้ออกจากหมู่บ้านและงดโหวต 1 วัน",
+    "Apprentice Seer":"เมื่อ Seer ตาย • รับหน้าที่ Seer และเช็ค 1 คน/คืน",
+    "Mayor":"ไม่มี Night Action • เสียงโหวตของตัวเองนับเป็น 2",
+    "Hunter":"เมื่อตาย • เลือกผู้เล่น 1 คนให้ตายตามทันที",
+    "Disease":"ถ้าถูกหมาป่าฆ่า • คืนถัดไปฝูงหมาป่าฆ่าไม่ได้",
+    "Pacifist":"ไม่มี Night Action • ต้องโหวตให้ผู้เล่นรอดเสมอ",
+    "Ghost":"เมื่อตาย • ส่งเบาะแสได้ทีละ 1 ตัวอักษรตามกติกา",
+    "Mason":"คืนแรก • ลืมตาเพื่อรู้ว่าใครเป็น Mason ด้วยกัน",
+    "Doppelganger":"คืนแรกเลือก 1 คน • เมื่อคนนั้นตาย รับ Role นั้น",
+    "Doppelgänger":"เลือกเป้าหมาย 1 คน • รับ/เลียนแบบ Role ตามกติกาชุดที่ใช้",
+    "Lycan":"อยู่ฝ่ายชาวบ้าน • แต่ Seer จะตรวจเห็นเป็นหมาป่า",
+    "Tough Guy":"ถ้าถูกหมาป่าฆ่า • ยังอยู่ต่อได้จนถึงคืนถัดไป",
+    "Villager Idiot":"ไม่มี Night Action • ต้องโหวตให้มีคนถูกกำจัดเสมอ",
+
+    // Werewolves
+    "Werewolf":"เลือกกำจัดผู้เล่น 1 คนต่อคืน",
+    "Lone Wolf":"ตื่นกับฝูงหมาป่า • มีเงื่อนไขชนะที่ต้องเหลือรอดตามกติกา",
+    "The Lone Wolf":"ต้องทำให้หมาป่าตัวอื่นตายและตัวเองรอดเพื่อชนะ",
+    "Wolf Cub":"ตื่นกับฝูงหมาป่า • ถ้าตาย ฝูงอาจกำจัด 2 คนคืนถัดไป",
+    "Minion":"คืนแรกดูว่าใครเป็นหมาป่า • ช่วยฝ่ายหมาป่าโดยไม่ใช่หมาป่าเอง",
+    "Sorcerer":"เลือกเช็ค 1 คน • รู้ว่าเป็น Seer หรือไม่",
+    "The Sorcerer":"เลือกตรวจหา Seer ตามกติกาเวอร์ชันที่ใช้",
+    "Hoodlum":"คืนแรกเลือก 2 เป้าหมาย • ต้องให้ทั้งคู่ตายและตัวเองรอด",
+    "Cursed":"เริ่มเป็นชาวบ้าน • ถ้าหมาป่าเลือกฆ่า จะเปลี่ยนเป็นหมาป่าแทน",
+    "Alpha Wolf":"ใช้ 1 ครั้ง/เกม • เปลี่ยนเหยื่อให้เป็นหมาป่าแทนการฆ่า",
+    "Alpha Werewolf":"เมื่อตาย เลือก 1 คนให้ตายตาม • Wiki มี Variant เพิ่มเติม",
+    "Big Bad Wolf":"หมาป่าพิเศษ • ใช้ความสามารถเสริมตามกติกาเวอร์ชันที่ใช้",
+    "Mystic Wolf":"หมาป่าพิเศษ • ใช้ความสามารถตรวจสอบตามกติกาเวอร์ชันที่ใช้",
+    "Omega Wolf":"อยู่ฝ่ายหมาป่า • มีข้อจำกัด/เงื่อนไขพิเศษระหว่างวัน",
+    "Werewolves|Poisoner":"เลือกวางพิษ 1 คนทุก 2 คืน • เป้าหมายตายภายหลังหากไม่ถูกช่วย",
+    "Fruit Brute":"Role ฝ่ายหมาป่า • ความสามารถขึ้นกับ Variant/house rule ที่ใช้",
+    "The Fallen Angel":"เลือกกำจัด 1 คนแยกจากฝูง • การโจมตีทะลุการป้องกัน",
+    "Confused Wolf":"ตื่นกับหมาป่า • ใช้เงื่อนไขพิเศษตาม Variant ที่เลือก",
+    "German shepherd":"Role ฝ่ายหมาป่า • ใช้ความสามารถตาม Variant/house rule",
+    "The Remorseful Werewolf":"ตื่นและเลือกเหยื่อกับหมาป่า • แต่ชนะกับฝ่ายชาวบ้าน",
+
+    // Neutral
+    "Moderator":"ควบคุมลำดับเกม • เรียก Role และตัดสินผล Action",
+    "The Moderator":"ควบคุมเกมและเรียก Role ตามลำดับ",
+    "Tanner":"ไม่มี Night Action • ชนะทันทีเมื่อตัวเองถูกกำจัดตามกติกา",
+    "Vampire":"เลือก 1 คน • เป้าหมายจะถูกกำจัดในช่วงโหวตวันถัดไป",
+    "Cult Leader":"เลือก 1 คนต่อคืน • ดึงเข้าลัทธิของตัวเอง",
+    "Neutral|Poisoner":"เลือกวางพิษ 1 คน • ผลทำงานตามกติกา Poisoner ที่ใช้",
+    "Turncoat":"Role กลาง • เปลี่ยน/เลือกฝ่ายตามเงื่อนไขของ Variant",
+    "Bloody Mary":"Role กลาง • ใช้เงื่อนไขพิเศษตาม Variant/house rule",
+    "Vengeful ghost":"หลังตาย • ใช้ความสามารถแก้แค้นตามกติกา Variant",
+    "Chef":"Role กลาง • ใช้ความสามารถตาม Variant/house rule ที่เลือก",
+    "Enchantress":"เลือกใช้มนตร์กับผู้เล่นตามกติกา Enchantress ที่ใช้",
+    "Arsonist":"เลือกทำเครื่องหมาย/ราดน้ำมันเป้าหมาย • จุดไฟตามเงื่อนไข",
+    "Thespian":"Role กลาง • ใช้ความสามารถตาม Variant/house rule ที่เลือก",
+    "Orphan":"เลือกไปอยู่กับผู้เล่น 1 คน • ผลที่เกิดกับอีกฝ่ายอาจกระทบทั้งคู่",
+    "The Guardian Angel":"เลือกป้องกัน 1 คนต่อคืนจากการโจมตี",
+    "The Priest":"เลือกมอบเกราะให้ 1 คน • กันการโจมตีจากหมาป่าครั้งถัดไป",
+
+    // Additional / Hunting Party
+    "Revealer":"เลือกเช็ค 1 คน • ถ้าเป็นหมาป่าเป้าหมายตาย ถ้าไม่ใช่ตัวเองตาย",
+    "Mentalist":"เลือกผู้เล่น 2 คน • รู้ว่าอยู่ฝ่ายเดียวกันหรือไม่",
+    "Huntress":"ใช้ 1 ครั้ง/เกม • เลือกกำจัดผู้เล่น 1 คนตอนกลางคืน",
+    "Mad Bomber":"เมื่อตาย • ผู้เล่นซ้ายและขวาตายตาม",
+    "Mystic Seer":"เลือกเช็ค 1 คน • รู้ Role ของคนนั้น",
+    "Sheriff":"พลังเสริมเพิ่มเติมจาก Role หลัก • ใช้ตามกติกา Sheriff ที่เลือก",
+    "Amnesiac":"พลังเสริมเพิ่มเติมจาก Role หลัก • ใช้ตามกติกา Amnesiac ที่เลือก"
+  };
+
+  function abilitySummary(role) {
+    return role.ability ||
+      ROLE_ABILITIES[`${role.cat || ""}|${role.name}`] ||
+      ROLE_ABILITIES[role.name] ||
+      role.action ||
+      "ความสามารถขึ้นกับกติกาเวอร์ชันที่ใช้";
+  }
+
+  const pickRole = (name, cat) => structuredClone(ROLE_LIBRARY.find(r => r.name === name && (!cat || r.cat === cat)));
+  const DEFAULT_ROLES = [
+    pickRole("Werewolf","Werewolves"),
+    pickRole("Seer","Villagers"),
+    pickRole("Bodyguard","Villagers"),
+    pickRole("Villager","Villagers")
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const setupView = $("setupView");
+  const playView = $("playView");
+  const roleList = $("roleList");
+  const durationInput = $("durationInput");
+  const nightInput = $("nightInput");
+  const voiceToggle = $("voiceToggle");
+  const autoToggle = $("autoToggle");
+  const firstNightSafeToggle = $("firstNightSafeToggle");
+  const cueToggle = $("cueToggle");
+  const roleSearch = $("roleSearch");
+  const libraryResults = $("libraryResults");
+  const categoryTabs = $("categoryTabs");
+
+  let roles = loadRoles();
+  let activeRoles = [];
+  let nightNumber = 1;
+  let currentIndex = 0;
+  let remaining = 30;
+  let totalDuration = 30;
+  let interval = null;
+  let paused = false;
+  let transitioning = false;
+  let activeCategory = "ทั้งหมด";
+  let wakeLock = null;
+  let toastTimer = null;
+  let currentSetupTab = "settings";
+
+  function setSetupTab(tab) {
+    currentSetupTab = tab === "order" ? "order" : "settings";
+    document.querySelectorAll(".setup-tab").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === currentSetupTab));
+    $("tab-settings").classList.toggle("active", currentSetupTab === "settings");
+    $("tab-order").classList.toggle("active", currentSetupTab === "order");
+    updateFlowButton();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function updateFlowButton() {
+    if (!$("startBtn")) return;
+    if (currentSetupTab === "settings") {
+      $("startBtn").innerHTML = `ตรวจลำดับการเรียก →`;
+      $("flowHint").textContent = "ขั้นตอนถัดไป";
+    } else {
+      $("startBtn").innerHTML = `🌙 เริ่ม Night <span id="startNightNum">${Math.max(1, Number(nightInput.value) || 1)}</span>`;
+      $("flowHint").textContent = "พร้อมเริ่ม";
+    }
+  }
+
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+  }
+
+  function loadRoles() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("werewolf_roles_v4") || localStorage.getItem("werewolf_roles_v3") || "null");
+      if (Array.isArray(saved) && saved.length) {
+        return saved.map(r => {
+          const preset = ROLE_LIBRARY.find(p => p.name === r.name && (!r.cat || p.cat === r.cat)) || {};
+          return {...preset, ...r, cat:r.cat || preset.cat || "Custom", mode:r.mode || preset.mode || "every"};
+        });
+      }
+    } catch {}
+    return structuredClone(DEFAULT_ROLES);
+  }
+
+  function saveRoles() {
+    localStorage.setItem("werewolf_roles_v4", JSON.stringify(roles));
+  }
+
+  function loadSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem("werewolf_settings_v1") || "{}");
+      if (Number.isFinite(Number(s.duration))) durationInput.value = Math.max(5, Math.min(180, Number(s.duration)));
+      if (typeof s.voice === "boolean") voiceToggle.checked = s.voice;
+      if (typeof s.auto === "boolean") autoToggle.checked = s.auto;
+      if (typeof s.firstNightSafe === "boolean") firstNightSafeToggle.checked = s.firstNightSafe;
+      if (typeof s.cues === "boolean") cueToggle.checked = s.cues;
+    } catch {}
+  }
+
+  function saveSettings() {
+    localStorage.setItem("werewolf_settings_v1", JSON.stringify({
+      duration: Math.max(5, Math.min(180, Number(durationInput.value) || 30)),
+      voice: voiceToggle.checked,
+      auto: autoToggle.checked,
+      firstNightSafe: firstNightSafeToggle.checked,
+      cues: cueToggle.checked
+    }));
+  }
+
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 1600);
+  }
+
+  function displayName(role) {
+    return role.th && role.th !== role.name ? role.th : role.name;
+  }
+
+  function categoryClass(cat) {
+    if (cat === "Werewolves") return "wolf";
+    if (cat === "Villagers") return "village";
+    if (cat === "Neutral") return "neutral";
+    return "";
+  }
+
+  function modeLabel(mode) {
+    return ({every:"ทุกคืน",first:"คืนแรก",manual:"ตามเงื่อนไข",never:"ไม่ตื่น"})[mode] || "ทุกคืน";
+  }
+
+  function isActiveTonight(role) {
+    const n = Math.max(1, Number(nightInput.value) || 1);
+    return role.mode === "every" ||
+      (role.mode === "first" && n === 1) ||
+      (role.mode === "manual" && Number(role.manualNight) === n);
+  }
+
+  function renderCategories() {
+    const cats = ["ทั้งหมด","Villagers","Werewolves","Neutral","Additional"];
+    categoryTabs.innerHTML = cats.map(cat =>
+      `<button class="chip ${cat===activeCategory?"active":""}" data-cat="${cat}">${cat}</button>`
+    ).join("");
+    categoryTabs.querySelectorAll(".chip").forEach(btn => btn.addEventListener("click", () => {
+      activeCategory = btn.dataset.cat;
+      renderCategories();
+      renderLibrary();
+    }));
+  }
+
+  function renderLibrary() {
+    const q = roleSearch.value.trim().toLowerCase();
+    const found = ROLE_LIBRARY.map((r,i)=>({...r,i})).filter(r => {
+      const catOk = activeCategory === "ทั้งหมด" || r.cat === activeCategory;
+      const hay = `${r.name} ${r.th||""} ${r.cat||""} ${abilitySummary(r)}`.toLowerCase();
+      return catOk && (!q || hay.includes(q));
+    }).slice(0, 40);
+
+    if (!found.length) {
+      libraryResults.innerHTML = `<div class="empty-mini">ไม่พบ Role ที่ค้นหา</div>`;
+      return;
+    }
+    libraryResults.innerHTML = found.map(r => `
+      <button class="library-item" data-index="${r.i}">
+        <div>
+          <div class="library-name">${esc(displayName(r))}</div>
+          <div class="library-sub">${esc(r.name !== displayName(r) ? r.name+" • " : "")}${esc(r.cat)}${Number.isFinite(r.points)?` • ${r.points>0?"+":""}${r.points} แต้ม`:""}</div>
+          <div class="library-ability"><span class="ability-icon">✦</span><span>${esc(abilitySummary(r))}</span></div>
+        </div>
+        <span class="add-circle">+</span>
+      </button>
+    `).join("");
+    libraryResults.querySelectorAll(".library-item").forEach(btn => btn.addEventListener("click", () => {
+      const preset = ROLE_LIBRARY[Number(btn.dataset.index)];
+      if (!preset) return;
+      roles.push(structuredClone(preset));
+      saveRoles(); renderRoles();
+      toast(`เพิ่ม ${displayName(preset)} แล้ว`);
+    }));
+  }
+
+  function renderRoles() {
+    roleList.innerHTML = "";
+    $("emptyRoles").classList.toggle("hidden", roles.length > 0);
+
+    roles.forEach((role, i) => {
+      const el = document.createElement("article");
+      el.className = "role-card";
+      el.className = `role-card ${isActiveTonight(role) ? "active-tonight" : "sleeping-role"}`;
+      el.innerHTML = `
+        <div class="role-card-head">
+          <div class="order">${String(i+1).padStart(2,"0")}</div>
+          <div>
+            <div class="role-title">${esc(displayName(role))}</div>
+            <div class="role-en">${role.th && role.th !== role.name ? esc(role.name) : esc(role.cat || "Custom")}</div>
+            <div class="role-tags">
+              <span class="tag ${categoryClass(role.cat)}">${esc(role.cat || "Custom")}</span>
+              <span class="tag">${modeLabel(role.mode)}</span>
+              ${Number.isFinite(role.points)?`<span class="tag">${role.points>0?"+":""}${role.points} แต้ม</span>`:""}
+            </div>
+          </div>
+          <div class="role-quick">
+            <button class="btn icon secondary up" data-i="${i}" aria-label="เลื่อนขึ้น" title="เลื่อนขึ้น">↑</button>
+            <button class="btn icon secondary down" data-i="${i}" aria-label="เลื่อนลง" title="เลื่อนลง">↓</button>
+            <button class="btn icon danger remove" data-i="${i}" aria-label="ลบ" title="ลบ">×</button>
+          </div>
+        </div>
+        <div class="role-action-preview"><span class="ability-kicker">ความสามารถ</span>${esc(abilitySummary(role))}</div>
+        ${role.mode === "manual" ? `
+          <div class="manual-wake">
+            <span>Role นี้ตื่นเมื่อเงื่อนไขเกิดขึ้น</span>
+            <label><input class="manual-tonight" data-i="${i}" type="checkbox" ${isActiveTonight(role) ? "checked" : ""}> เรียกคืนนี้</label>
+          </div>` : ""}
+        <details class="role-editor">
+          <summary>แก้ Action / การเรียก ▾</summary>
+          <div class="role-details">
+            <div class="role-details-grid">
+              <div>
+                <label class="panel-desc" for="action-${i}">สิ่งที่ Moderator ต้องให้ Role ทำ</label>
+                <textarea id="action-${i}" class="field role-action" data-i="${i}" placeholder="คำสั่งของ Role">${esc(role.action || "")}</textarea>
+              </div>
+              <div>
+                <label class="panel-desc" for="mode-${i}">ตื่นเมื่อไหร่</label>
+                <select id="mode-${i}" class="field mode-select role-mode" data-i="${i}">
+                  <option value="every" ${role.mode==="every"?"selected":""}>ทุกคืน</option>
+                  <option value="first" ${role.mode==="first"?"selected":""}>คืนแรกเท่านั้น</option>
+                  <option value="manual" ${role.mode==="manual"?"selected":""}>ตามเงื่อนไข</option>
+                  <option value="never" ${role.mode==="never"?"selected":""}>ไม่ต้องลืมตา</option>
+                </select>
+              </div>
+            </div>
+            ${role.note?`<div class="role-note">💡 ${esc(role.note)}</div>`:""}
+          </div>
+        </details>
+      `;
+      roleList.appendChild(el);
+    });
+
+    document.querySelectorAll(".role-action").forEach(inp => {
+      inp.addEventListener("input", e => {
+        const role = roles[+e.target.dataset.i];
+        role.action = e.target.value;
+        if (role.cat === "Custom") role.ability = e.target.value;
+        saveRoles();
+      });
+      inp.addEventListener("change", () => renderRoles());
+    });
+    document.querySelectorAll(".role-mode").forEach(inp => inp.addEventListener("change", e => {
+      roles[+e.target.dataset.i].mode = e.target.value; saveRoles(); renderRoles();
+    }));
+    document.querySelectorAll(".manual-tonight").forEach(inp => inp.addEventListener("change", e => {
+      const i = +e.target.dataset.i;
+      const n = Math.max(1, Number(nightInput.value) || 1);
+      roles[i].manualNight = e.target.checked ? n : null;
+      saveRoles();
+      renderRoles();
+      toast(e.target.checked ? `ตั้งให้ ${displayName(roles[i])} ตื่นคืนนี้` : `ข้าม ${displayName(roles[i])} คืนนี้`);
+    }));
+    document.querySelectorAll(".up").forEach(btn => btn.addEventListener("click", () => move(+btn.dataset.i,-1)));
+    document.querySelectorAll(".down").forEach(btn => btn.addEventListener("click", () => move(+btn.dataset.i,1)));
+    document.querySelectorAll(".remove").forEach(btn => btn.addEventListener("click", () => removeRole(+btn.dataset.i)));
+
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const tonight = roles.filter(isActiveTonight);
+    const scored = roles.filter(r => Number.isFinite(r.points));
+    const total = scored.reduce((sum,r)=>sum+r.points,0);
+
+    $("roleCountMetric").textContent = roles.length;
+    $("wakeCountMetric").textContent = tonight.length;
+    $("balanceTotal").textContent = `${total>0?"+":""}${total}`;
+    $("headerRoleCount").textContent = `${roles.length} Role`;
+    $("headerNight").textContent = Math.max(1, Number(nightInput.value) || 1);
+    $("headerDuration").textContent = Math.max(5, Number(durationInput.value) || 30);
+    const duration = Math.max(5, Number(durationInput.value) || 30);
+    const estimatedSeconds = tonight.length * duration;
+    const estimatedMinutes = Math.max(1, Math.ceil(estimatedSeconds / 60));
+    $("startSummary").innerHTML = `${tonight.length} Role • <span class="estimate">~${estimatedMinutes} นาที</span>`;
+
+
+    $("orderTabCount").textContent = `${tonight.length} Role ตื่นคืนนี้`;
+    $("selectedRoleCount").textContent = roles.length;
+    $("selectedRolesPreview").innerHTML = roles.length
+      ? roles.map((r,i)=>`
+          <div class="selected-role-card">
+            <div>
+              <div class="selected-role-name">${esc(displayName(r))}</div>
+              <div class="selected-role-ability">${esc(abilitySummary(r))}</div>
+            </div>
+            <button class="selected-remove" data-i="${i}" aria-label="ลบ ${esc(displayName(r))}">×</button>
+          </div>
+        `).join("")
+      : `<div class="selected-empty">ยังไม่ได้เลือก Role</div>`;
+    document.querySelectorAll(".selected-remove").forEach(btn => btn.addEventListener("click", () => removeRole(+btn.dataset.i)));
+    updateFlowButton();
+
+    const balanceMetric = $("balanceMetric");
+    balanceMetric.classList.remove("balance-positive","balance-negative","balance-neutral");
+    balanceMetric.classList.add(Math.abs(total)<=2 ? "balance-neutral" : total>0 ? "balance-positive" : "balance-negative");
+
+    $("sequencePreview").innerHTML = roles.length
+      ? roles.map(r=>`<span class="seq ${isActiveTonight(r)?"":"off"}">${esc(displayName(r))}</span>`).join("")
+      : `<span class="panel-desc">ยังไม่มีลำดับ</span>`;
+
+    const manualPending = roles.filter(r => r.mode === "manual" && !isActiveTonight(r)).length;
+    const readiness = $("readinessBox");
+    const hasWolf = roles.some(r => r.cat === "Werewolves");
+    let title = "พร้อมเริ่ม Night Phase";
+    let text = `${tonight.length} Role จะตื่น • ใช้เวลาประมาณ ${estimatedMinutes} นาที`;
+    let badge = "READY";
+    let state = "ok";
+
+    if (!tonight.length) {
+      title = "ยังเริ่มไม่ได้";
+      text = "ไม่มี Role ที่ถูกตั้งให้ตื่นในคืนนี้";
+      badge = "FIX";
+      state = "warn";
+    } else if (manualPending) {
+      title = "ตรวจ Role ตามเงื่อนไข";
+      text = `มี ${manualPending} Role แบบ “ตามเงื่อนไข” ที่ยังไม่ได้เปิดเรียกคืนนี้ • ถ้าเงื่อนไขเกิดขึ้นให้เปิดสวิตช์ก่อนเริ่ม`;
+      badge = "CHECK";
+      state = "warn";
+    } else if (!hasWolf) {
+      title = "พร้อม แต่ไม่พบ Role ฝ่ายหมาป่า";
+      text = `${tonight.length} Role จะตื่น • ถ้าตั้งใจเล่น Variant ที่ไม่มีหมาป่าสามารถเริ่มได้`;
+      badge = "CHECK";
+      state = "warn";
+    }
+    readiness.className = `readiness ${state}`;
+    $("readinessTitle").textContent = title;
+    $("readinessText").textContent = text;
+    $("readinessBadge").textContent = badge;
+  }
+
+  function move(i, dir) {
+    const j=i+dir;
+    if(j<0||j>=roles.length) return;
+    [roles[i],roles[j]]=[roles[j],roles[i]];
+    saveRoles(); renderRoles();
+  }
+
+  function removeRole(i) {
+    const name=displayName(roles[i]);
+    roles.splice(i,1);
+    saveRoles(); renderRoles();
+    toast(`ลบ ${name} แล้ว`);
+  }
+
+  $("addRoleBtn").addEventListener("click",()=>{
+    roles.push({name:"Custom Role",th:"",cat:"Custom",points:null,source:"Custom",mode:"every",action:"ระบุความสามารถของ Role นี้",ability:"ระบุความสามารถของ Role นี้"});
+    saveRoles(); renderRoles();
+    setTimeout(()=>roleList.lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"}),50);
+  });
+
+  $("osPresetBtn").addEventListener("click",()=>{
+    roles=[
+      pickRole("Werewolf","Werewolves"),
+      pickRole("Seer","Villagers"),
+      pickRole("Bodyguard","Villagers"),
+      pickRole("Villager","Villagers")
+    ];
+    saveRoles(); renderRoles(); toast("โหลดชุดเริ่มต้นแล้ว");
+  });
+
+  $("resetBtn").addEventListener("click",()=>{
+    roles=structuredClone(DEFAULT_ROLES);saveRoles();renderRoles();toast("รีเซ็ต Role แล้ว");
+  });
+
+
+  $("testVoiceBtn").addEventListener("click", () => {
+    if (!voiceToggle.checked) {
+      voiceToggle.checked = true;
+      saveSettings();
+    }
+    speak("ทดสอบเสียง Werewolf Moderator พร้อมใช้งาน", () => toast("ทดสอบเสียงแล้ว"));
+  });
+
+  roleSearch.addEventListener("input",renderLibrary);
+  nightInput.addEventListener("input",()=>{ renderRoles(); updateSummary(); });
+  durationInput.addEventListener("input",()=>{ saveSettings(); updateSummary(); });
+  [voiceToggle,autoToggle,firstNightSafeToggle,cueToggle].forEach(el => el.addEventListener("change", saveSettings));
+
+  let audioCtx = null;
+  function cue(kind="soft") {
+    if (!cueToggle.checked) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = kind === "urgent" ? 740 : 560;
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.13);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.14);
+    } catch {}
+    try {
+      if ("vibrate" in navigator) navigator.vibrate(kind === "urgent" ? [70,45,70] : 60);
+    } catch {}
+  }
+
+  function speak(text,onDone){
+    let finished=false;
+    const done=()=>{if(finished)return;finished=true;onDone?.()};
+    if(!voiceToggle.checked||!("speechSynthesis" in window)){setTimeout(done,260);return}
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="th-TH";u.rate=.9;u.pitch=.96;u.onend=done;u.onerror=done;
+    speechSynthesis.speak(u);
+    setTimeout(done,4500);
+  }
+
+  async function requestWakeLock(){
+    try{
+      if("wakeLock" in navigator) wakeLock=await navigator.wakeLock.request("screen");
+    }catch{}
+  }
+  async function releaseWakeLock(){
+    try{await wakeLock?.release()}catch{}
+    wakeLock=null;
+  }
+
+  function startNight(){
+    roles=roles.map(r=>({...r,name:(r.name||"").trim(),action:(r.action||"").trim(),mode:r.mode||"every"})).filter(r=>r.name);
+    nightNumber=Math.max(1,Number(nightInput.value)||1);
+    activeRoles=roles.filter(isActiveTonight);
+    if(!activeRoles.length){alert("คืนนี้ไม่มี Role ที่ต้องลืมตา กรุณาเปลี่ยนโหมด Role ก่อนเริ่ม");return}
+    saveRoles();
+    totalDuration=Math.max(5,Math.min(180,Number(durationInput.value)||30));
+    currentIndex=0;paused=false;transitioning=false;
+    setupView.style.display="none";playView.style.display="block";
+    $("playingState").classList.remove("hidden");$("doneState").classList.add("hidden");
+    $("playNight").textContent=nightNumber;
+    requestWakeLock();
+    window.WWOnline?.beginNight?.({nightNumber,totalDuration});
+    showRole();
+  }
+
+  function setNextRole(){
+    const next=activeRoles[currentIndex+1];
+    $("nextRole").textContent=next?displayName(next):"จบ Night Phase";
+  }
+
+  function showRole(){
+    clearInterval(interval);
+    transitioning=true;paused=false;
+    $("pausedOverlay").classList.add("hidden");
+    $("pauseBtn").textContent="⏸ พัก";
+    const role=activeRoles[currentIndex];
+    const spoken=role.th||role.name;
+    const shown=role.th&&role.th!==role.name?`${role.th} (${role.name})`:role.name;
+    remaining=totalDuration;
+
+    $("currentRole").textContent=shown;
+    $("instruction").textContent="ลืมตา";
+    $("actionText").textContent="กำลังประกาศชื่อ Role…";
+    $("stepLabel").textContent=`${currentIndex+1} / ${activeRoles.length}`;
+    $("stateText").textContent="กำลังเรียก";
+    $("stateLabel").style.opacity="1";
+    setNextRole();updateTimer();updateProgress();
+    const phaseAction=(nightNumber===1&&firstNightSafeToggle.checked&&role.firstAction)?role.firstAction:role.action;
+    window.WWOnline?.publishRole?.(role,{
+      nightNumber,totalDuration,action:phaseAction,
+      step:currentIndex+1,total:activeRoles.length
+    });
+
+    speak(`${spoken} ลืมตา`,()=>{
+      const action=phaseAction;
+      $("actionText").textContent=action||"ตัดสินใจและทำหน้าที่ของคุณ";
+      $("stateText").textContent="กำลังตัดสินใจ";
+      transitioning=false;
+      interval=setInterval(tick,1000);
+    });
+  }
+
+  function tick(){
+    if(paused||transitioning)return;
+    remaining--;
+    if (remaining === 10) cue("soft");
+    if (remaining === 5) cue("urgent");
+    if(remaining<=0){remaining=0;updateTimer();clearInterval(interval);finishRole();return}
+    updateTimer();
+  }
+
+  function updateTimer(){
+    $("seconds").textContent=remaining;
+    const pct=Math.max(0,Math.min(100,(remaining/totalDuration)*100));
+    const circle=$("timerCircle");
+    circle.style.setProperty("--progress",pct+"%");
+    circle.classList.toggle("urgent",remaining<=10&&remaining>5);
+    circle.classList.toggle("critical",remaining<=5);
+  }
+
+  function updateProgress(){
+    const pct=activeRoles.length?((currentIndex)/activeRoles.length)*100:0;
+    $("progressBar").style.width=pct+"%";
+  }
+
+  function finishRole(force=false){
+    if(transitioning)return;
+    transitioning=true;clearInterval(interval);
+    const role=activeRoles[currentIndex];
+    $("instruction").textContent="หลับตา";
+    $("stateText").textContent="กำลังปิด Role";
+    $("actionText").textContent="หมดเวลา";
+    window.WWOnline?.publishSleep?.(role);
+
+    speak(`${role.th||role.name} หลับตา`,()=>{
+      const go=()=>{
+        currentIndex++;
+        if(currentIndex>=activeRoles.length) finishNight();
+        else showRole();
+      };
+      if(force||autoToggle.checked) go();
+      else{
+        $("stateText").textContent="รอ Moderator";
+        $("actionText").textContent="พร้อมแล้วกด “Role ถัดไป”";
+        $("skipBtn").textContent="Role ถัดไป →";
+        $("skipBtn").onclick=()=>{
+          $("skipBtn").textContent="ถัดไป →";
+          $("skipBtn").onclick=skipCurrent;
+          go();
+        };
+        transitioning=false;
+      }
+    });
+  }
+
+  function skipCurrent(){
+    if(currentIndex>=activeRoles.length || transitioning)return;
+    finishRole(true);
+  }
+
+
+  async function toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen?.();
+        $("fullscreenBtn").textContent = "⤢";
+        $("fullscreenBtn").title = "ออกจากเต็มจอ";
+      } else {
+        await document.exitFullscreen?.();
+        $("fullscreenBtn").textContent = "⛶";
+        $("fullscreenBtn").title = "เต็มจอ";
+      }
+    } catch {
+      toast("Browser นี้ไม่รองรับ Fullscreen");
+    }
+  }
+
+  function finishNight(){
+    clearInterval(interval);
+    $("progressBar").style.width="100%";
+    $("playingState").classList.add("hidden");
+    $("doneState").classList.remove("hidden");
+    $("pausedOverlay").classList.add("hidden");
+    releaseWakeLock();
+    window.WWOnline?.publishDay?.({nightNumber});
+    speak("จบช่วงกลางคืน ทุกคนลืมตาได้");
+  }
+
+  function togglePause(){
+    if(transitioning)return;
+    paused=!paused;
+    $("pauseBtn").textContent=paused?"▶ เล่นต่อ":"⏸ พัก";
+    $("pausedOverlay").classList.toggle("hidden",!paused);
+    if(paused)speak("พักเวลา");
+  }
+
+  $("startBtn").addEventListener("click",()=>{
+    if(currentSetupTab === "settings") setSetupTab("order");
+    else startNight();
+  });
+  document.querySelectorAll(".setup-tab").forEach(btn => btn.addEventListener("click",()=>setSetupTab(btn.dataset.tab)));
+  $("pauseBtn").addEventListener("click",togglePause);
+  $("fullscreenBtn").addEventListener("click",toggleFullscreen);
+  $("skipBtn").addEventListener("click",skipCurrent);
+  $("stopBtn").addEventListener("click",finishNight);
+  $("againBtn").addEventListener("click",()=>{
+    nightInput.value=nightNumber+1;
+    updateSummary();
+    const nextNight=Math.max(1,Number(nightInput.value)||1);
+    roles.forEach(r => { if (r.mode === "manual") r.manualNight = null; });
+    saveRoles();
+    const nextRoles=roles.filter(isActiveTonight);
+    if(!nextRoles.length){
+      playView.style.display="none";setupView.style.display="block";return;
+    }
+    nightNumber=nextNight;
+    activeRoles=nextRoles;
+    totalDuration=Math.max(5,Math.min(180,Number(durationInput.value)||30));
+    currentIndex=0;
+    $("playNight").textContent=nightNumber;
+    $("playingState").classList.remove("hidden");$("doneState").classList.add("hidden");
+    requestWakeLock();showRole();
+  });
+  $("editBtn").addEventListener("click",()=>{
+    clearInterval(interval);releaseWakeLock();
+    playView.style.display="none";setupView.style.display="block";setSetupTab("order");renderRoles();
+  });
+
+  $("pausedOverlay").addEventListener("click",()=>{if(paused)togglePause()});
+  document.addEventListener("keydown",e=>{
+    if(playView.style.display!=="block")return;
+    if(e.code==="Space"){e.preventDefault();togglePause()}
+    if(e.code==="ArrowRight"){e.preventDefault();skipCurrent()}
+  });
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&playView.style.display==="block")requestWakeLock()});
+
+
+  window.WWModeratorBridge = {
+    getRoles: () => roles.map(r => ({
+      name:r.name, th:r.th || "", cat:r.cat || "Custom",
+      action:r.action || "", ability:abilitySummary(r),
+      mode:r.mode || "every", points:Number.isFinite(r.points) ? r.points : null
+    })),
+    getNight: () => Math.max(1, Number(nightInput.value) || nightNumber || 1),
+    getDuration: () => Math.max(5, Math.min(180, Number(durationInput.value) || 30)),
+    displayName: (r) => displayName(r),
+    abilitySummary: (r) => abilitySummary(r)
+  };
+
+  loadSettings();
+  renderCategories();
+  renderLibrary();
+  renderRoles();
+})();
+</script>
+<script type="module" src="./moderator-online.js"></script>
+</body>
+</html>
