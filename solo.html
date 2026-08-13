@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a10">
+<title>Werewolf Solo Moderator</title>
+<style>
+:root{color-scheme:dark;--bg:#080a10;--card:#121722;--line:#2d374a;--text:#f6f8fc;--muted:#94a0b3;--red:#ef4454;--gold:#efb34c;--green:#43c486}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}body{background:radial-gradient(900px 500px at 50% -10%,rgba(239,68,84,.14),transparent 60%),var(--bg)}button,input,textarea,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}.app{max-width:760px;margin:auto;padding:16px 14px calc(28px + env(safe-area-inset-bottom));min-height:100dvh}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.brand{font-weight:950}.pill{border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:10px;color:#aab4c4;background:#111722}.card{background:linear-gradient(180deg,#171d29,#10151f);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);margin-bottom:12px}.title{font-size:clamp(29px,8vw,48px);font-weight:950;letter-spacing:-.04em;margin:0}.sub{color:var(--muted);font-size:13px;line-height:1.55;margin:8px 0 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{width:100%;min-height:48px;border:1px solid var(--line);background:#0c1119;color:white;border-radius:14px;padding:10px 12px}.textarea{min-height:150px;resize:vertical}.btn{border:0;border-radius:14px;min-height:48px;padding:10px 13px;background:#273146;color:#fff;font-weight:900}.btn.primary{background:linear-gradient(145deg,#ef4454,#c82b3d)}.btn.gold{background:linear-gradient(145deg,#efb34c,#c8841f);color:#160d04}.btn.ghost{background:transparent;border:1px solid var(--line)}.btn:disabled{opacity:.38}.row{display:flex;gap:8px;flex-wrap:wrap}.role-pool{display:grid;gap:7px;margin-top:10px}.role-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 10px;border:1px solid #2d374a;border-radius:13px;background:#0d131d;font-size:12px}.count{display:inline-flex;align-items:center;gap:7px}.count button{width:30px;height:30px;border:1px solid #38445a;border-radius:10px;background:#171e2a;color:white}.stage{text-align:center;min-height:68dvh;display:flex;flex-direction:column;justify-content:center}.icon{font-size:68px}.stage-title{font-size:clamp(34px,10vw,64px);font-weight:950;letter-spacing:-.05em;margin:10px 0 4px}.stage-sub{color:#a4afbf;line-height:1.5}.secret{border-color:#4a3037;background:radial-gradient(520px 260px at 50% 0%,rgba(239,68,84,.15),transparent 65%),#111620}.secret-role{font-size:clamp(42px,13vw,78px);font-weight:950;letter-spacing:-.06em;margin:14px 0 8px}.ability{margin:12px auto 0;max-width:520px;padding:12px 14px;border:1px solid #364158;border-radius:15px;background:#151c28;color:#d4dce8;font-size:13px;line-height:1.55}.night{border-color:#35405c;background:radial-gradient(620px 320px at 50% 0%,rgba(90,105,170,.15),transparent 65%),#0c111a}.night-role{font-size:clamp(40px,12vw,72px);font-weight:950;letter-spacing:-.05em;margin:8px 0}.timer{font-size:clamp(68px,18vw,120px);font-weight:950;line-height:1;font-variant-numeric:tabular-nums;margin:15px 0}.targets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.target{min-height:52px;border:1px solid #344057;background:#111824;color:#dce4ee;border-radius:14px;padding:9px 10px;font-weight:850}.target.selected{border-color:#b84755;background:#321921;color:#ffd7dc}.result{border-color:#5b482a;background:radial-gradient(500px 260px at 50% 0%,rgba(239,179,76,.15),transparent 65%),#14130f}.result-main{font-size:clamp(38px,11vw,70px);font-weight:950;letter-spacing:-.05em;margin:10px 0}.result-good{color:#aee9c8}.result-bad{color:#ffb7c0}.mini{font-size:11px;color:#8f9bad}.status-list{display:grid;gap:7px;margin-top:10px}.status-row{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid #2b364a;background:#0d131d;font-size:12px}.dead{opacity:.5}.setup-note{padding:10px 12px;border:1px solid #4e4129;background:#211b11;border-radius:13px;color:#efd398;font-size:11px;line-height:1.55;margin-top:10px}.overlay{position:fixed;inset:0;background:#06080d;z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}.overlay-box{max-width:640px;width:100%}.overlay .result-main{font-size:clamp(48px,14vw,92px)}
+@media(max-width:560px){.grid,.targets{grid-template-columns:1fr}.app{padding-left:11px;padding-right:11px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top"><div class="brand">🐺 Werewolf Solo Moderator</div><div class="pill">มือถือเครื่องเดียว • ไม่ใช้ Firebase</div></header>
+
+<section id="setupView">
+  <div class="card">
+    <h1 class="title">One-Phone Mode</h1>
+    <p class="sub">วางมือถือไว้กลางวง แล้วให้ระบบเป็น Moderator อัตโนมัติ เสียงจะเรียก Role ให้ลืมตา/หลับตา ส่วนข้อมูลลับอย่างผล Seer จะแสดงบนจอเฉพาะตอน Role นั้นลืมตา</p>
+    <div class="setup-note">สำคัญ: ผลลับจะไม่พูดออกเสียง เช่น Seer จะเห็นผลบนหน้าจอ 4 วินาที แล้วระบบซ่อนก่อนประกาศให้หลับตา</div>
+  </div>
+  <div class="card grid">
+    <div>
+      <b>ชื่อผู้เล่น</b>
+      <p class="sub">ใส่ 1 ชื่อต่อ 1 บรรทัด</p>
+      <textarea id="playersInput" class="field textarea" placeholder="Mint\nBank\nPloy\nGame\n..."></textarea>
+    </div>
+    <div>
+      <b>ตั้งค่ากลางคืน</b>
+      <p class="sub">เวลาต่อ Role</p>
+      <select id="durationSelect" class="field"><option value="20">20 วินาที</option><option value="30" selected>30 วินาที</option><option value="45">45 วินาที</option><option value="60">60 วินาที</option></select>
+      <div style="height:9px"></div>
+      <label class="sub"><input id="voiceToggle" type="checkbox" checked> ใช้เสียงเรียก Role ภาษาไทย</label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid"><div><b>Role Pool</b><p class="sub">จำนวน Role ต้องเท่ากับจำนวนผู้เล่น</p></div><select id="roleSelect" class="field"></select></div>
+    <div class="row" style="margin-top:8px"><button id="addRoleBtn" class="btn ghost">+ เพิ่ม Role</button><button id="clearRolesBtn" class="btn ghost">ล้าง Role</button></div>
+    <div id="rolePool" class="role-pool"></div>
+  </div>
+  <button id="assignBtn" class="btn primary" style="width:100%;min-height:58px">สุ่มแจก Role → ส่งมือถือวนดู Role</button>
+</section>
+
+<section id="revealView" class="hidden">
+  <div class="card stage secret">
+    <div class="icon">🔒</div>
+    <div id="revealPlayer" class="stage-title">—</div>
+    <div id="revealPrompt" class="stage-sub">ส่งมือถือให้ผู้เล่นคนนี้เพียงคนเดียว</div>
+    <div id="roleSecret" class="hidden"><div id="roleSecretName" class="secret-role">—</div><div id="roleSecretAbility" class="ability">—</div></div>
+    <div class="row" style="justify-content:center;margin-top:18px"><button id="showRoleBtn" class="btn primary">แตะเพื่อดู Role</button><button id="nextRevealBtn" class="btn ghost hidden">ซ่อนแล้วส่งให้คนถัดไป</button></div>
+  </div>
+</section>
+
+<section id="centerView" class="hidden">
+  <div class="card stage night">
+    <div class="icon">🌙</div>
+    <div class="stage-title">พร้อมวางกลางวง</div>
+    <div class="stage-sub">ทุกคนรู้ Role ของตัวเองแล้ว วางมือถือไว้ตรงกลางแล้วกดเริ่ม Night</div>
+    <div class="row" style="justify-content:center;margin-top:18px"><button id="startNightBtn" class="btn primary">เริ่ม Night 1</button></div>
+  </div>
+  <div class="card"><b>สถานะผู้เล่น</b><div id="playerStatus" class="status-list"></div></div>
+</section>
+
+<section id="nightView" class="hidden">
+  <div class="card stage night">
+    <div id="nightIcon" class="icon">🌙</div>
+    <div id="nightLabel" class="mini">NIGHT 1</div>
+    <div id="nightRole" class="night-role">ทุกคนหลับตา</div>
+    <div id="nightInstruction" class="stage-sub">รอฟังเสียงเรียก Role</div>
+    <div id="nightTimer" class="timer">30</div>
+    <div id="nightTargets" class="targets"></div>
+    <div id="nightExtra" class="ability hidden"></div>
+    <div class="row" style="justify-content:center;margin-top:14px"><button id="confirmActionBtn" class="btn primary hidden">ยืนยัน Action</button><button id="skipActionBtn" class="btn ghost hidden">ข้าม / ไม่ใช้</button></div>
+  </div>
+</section>
+
+<section id="dawnView" class="hidden">
+  <div class="card stage result">
+    <div class="icon">☀️</div><div class="stage-title">ทุกคนลืมตา</div><div id="dawnResult" class="result-main">คืนนี้ไม่มีใครถูกกำจัด</div><div class="stage-sub">ระบบจะไม่เปิดเผย Role ของผู้ที่ถูกกำจัด</div>
+    <div class="row" style="justify-content:center;margin-top:18px"><button id="nextNightBtn" class="btn primary">เริ่มคืนถัดไป</button><button id="dayEliminateBtn" class="btn ghost">บันทึกคนถูกโหวตออก</button></div>
+  </div>
+  <div class="card"><b>ผู้เล่นที่ยังอยู่</b><div id="dawnStatus" class="status-list"></div></div>
+</section>
+
+<div id="privateResult" class="overlay hidden"><div class="overlay-box"><div class="mini">ข้อมูลลับ • คนอื่นควรหลับตา</div><div id="privateResultTitle" class="result-main">—</div><div id="privateResultSub" class="stage-sub">—</div><div id="privateResultCountdown" class="timer" style="font-size:42px">4</div></div></div>
+</main>
+<script type="module" src="./solo.js"></script>
+</body>
+</html>
