@@ -44,8 +44,9 @@
         },
         "votes": {
           "$voteId": {
+            ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid && (root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote_reveal' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'defense' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote_result')",
             "$uid": {
-              ".read": "auth != null && (auth.uid == $uid || (root.child('rooms').child($room).child('hostUid').val() == auth.uid && (root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote_reveal' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'defense' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote_result')))",
+              ".read": "auth != null && auth.uid == $uid",
               ".write": "auth != null && auth.uid == $uid && !data.exists() && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'vote' && root.child('rooms').child($room).child('public').child('phase').child('voteId').val() == $voteId"
             }
           }
@@ -60,8 +61,9 @@
         },
         "confirmVotes": {
           "$confirmId": {
+            ".read": "auth != null && root.child('rooms').child($room).child('hostUid').val() == auth.uid && (root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_reveal' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_result')",
             "$uid": {
-              ".read": "auth != null && (auth.uid == $uid || (root.child('rooms').child($room).child('hostUid').val() == auth.uid && (root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_reveal' || root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_result')))",
+              ".read": "auth != null && auth.uid == $uid",
               ".write": "auth != null && auth.uid == $uid && !data.exists() && root.child('rooms').child($room).child('public').child('phase').child('state').val() == 'confirm_vote' && root.child('rooms').child($room).child('public').child('phase').child('confirmId').val() == $confirmId && (newData.child('choice').val() == 'eliminate' || newData.child('choice').val() == 'pardon')"
             }
           }
