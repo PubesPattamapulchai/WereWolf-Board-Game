@@ -1,6 +1,14 @@
-// Player entrypoint v3: load the full multiplayer engine and prevent clicks before Firebase Auth is ready.
+// Player entrypoint v3: full multiplayer engine + Firebase join guard + premium presentation.
 const joinBtn = document.getElementById("joinBtn");
 const statusEl = document.getElementById("connectionStatus");
+
+if (!document.querySelector('link[data-premium-player]')) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = './premium-theme.css?v=20260814-audit4';
+  link.dataset.premiumPlayer = '1';
+  document.head.appendChild(link);
+}
 
 if (joinBtn) {
   joinBtn.disabled = true;
@@ -21,11 +29,11 @@ const statusObserver = statusEl ? new MutationObserver(() => {
     }
   }
 }) : null;
-
 statusObserver?.observe(statusEl, { childList: true, characterData: true, subtree: true });
 
 try {
-  await import("./player-core-v3.js?v=20260814-audit1");
+  await import("./player-core-v3.js?v=20260814-audit4");
+  await import("./premium-effects.js?v=20260814-audit4");
   if (statusEl?.textContent?.includes("ออนไลน์") && joinBtn) {
     joinBtn.disabled = false;
     joinBtn.textContent = "เข้าห้อง";
