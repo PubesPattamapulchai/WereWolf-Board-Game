@@ -25,17 +25,19 @@ async function patchAssignmentIntel(){
   if(!assignedIds.length)return;
   const signature=assignedIds.map(id=>`${id}:${priv[id].role.key||priv[id].role.name}`).sort().join("|");
   if(signature===lastPatchedAssignment)return;
+  // Lock before write because local Firebase listeners can fire synchronously around update().
+  lastPatchedAssignment=signature;
   const wolves=assignedIds.filter(id=>isActualWerewolfRole(roleOf(id))).map(id=>({uid:id,name:nameOf(id)}));
   const masons=assignedIds.filter(id=>roleOf(id)?.name==="Mason").map(id=>({uid:id,name:nameOf(id)}));
   const updates={};
   for(const id of assignedIds){
     const role=roleOf(id);let teammates=[];
     if(isActualWerewolfRole(role))teammates=wolves.filter(x=>x.uid!==id);
-    else if(role?.name==="Minion")teammates=wolves; // Minion knows who the wolves are, but wolves do not learn Minion here.
+    else if(role?.name==="Minion")teammates=wolves;
     else if(role?.name==="Mason")teammates=masons.filter(x=>x.uid!==id);
     updates[`private/${id}/teammates`]=teammates.length?teammates:null;
   }
-  await update(ref(db,roomPath()),updates);lastPatchedAssignment=signature;
+  try{await update(ref(db,roomPath()),updates)}catch(e){lastPatchedAssignment="";throw e}
 }
 
 function actualTeam(id){return teamForRole(roleOf(id),priv?.[id]?.resources||{})}
