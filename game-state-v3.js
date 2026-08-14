@@ -2,16 +2,17 @@ import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebase
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 import { firebaseConfig } from "./firebase-config.js";
-import { isActualWerewolfRole } from "./game-rules.js";
+import { teamForRole } from "./game-rules.js";
 
 const $=id=>document.getElementById(id);
 let app,auth,db,uid="",room="",players={},priv={},pub={},checking=false,lastDecision="";
 const roomPath=p=>`rooms/${room}${p?"/"+p:""}`;
 const aliveIds=()=>Object.entries(players||{}).filter(([,p])=>p?.alive!==false).map(([id])=>id);
 const roleOf=id=>priv?.[id]?.role||null;
+const teamOf=id=>teamForRole(roleOf(id),priv?.[id]?.resources||{});
 
-// These roles can change the normal faction end condition or have an independent win condition.
-// When present, the browser refuses to auto-declare a winner rather than making a false ruling.
+// Independent/special win roles can change the normal faction end condition.
+// With one of these present, do not auto-declare a standard faction winner.
 const SPECIAL_WIN = new Set([
   "Tanner","Lone Wolf","The Lone Wolf","Hoodlum","Vampire","Cult Leader","Turncoat",
   "Bloody Mary","Vengeful ghost","Chef","Enchantress","Arsonist","Thespian","Orphan",
@@ -27,8 +28,6 @@ function setNote(text,warn=false){installUI();const el=$("winGuardV3");if(!el)re
 async function ensure(){app=getApps().length?getApp():initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);if(!auth.currentUser)await signInAnonymously(auth);uid=auth.currentUser.uid;room=localStorage.getItem("ww_host_room")||"";return Boolean(room)}
 async function refresh(){if(!(await ensure()))return false;const [p,r,u]=await Promise.all([get(ref(db,roomPath("players"))),get(ref(db,roomPath("private"))),get(ref(db,roomPath("public")))]);players=p.val()||{};priv=r.val()||{};pub=u.val()||{};return true}
 function hasSpecialWinRole(){return Object.values(priv||{}).some(d=>SPECIAL_WIN.has(d?.role?.name||""))}
-function convertedWolf(id){return roleOf(id)?.name==="Cursed"&&Boolean(priv?.[id]?.resources?.convertedToWerewolf)}
-function actualWolf(id){return isActualWerewolfRole(roleOf(id))||convertedWolf(id)}
 
 async function evaluate(){
   if(checking)return;checking=true;
@@ -38,13 +37,16 @@ async function evaluate(){
     if(state==="gameover")return;
     const ids=aliveIds();if(!ids.length)return;
     if(hasSpecialWinRole()){setNote("🏁 Win Guard: ชุดนี้มี Role เงื่อนไขชนะพิเศษ — Host ต้องตรวจชัยชนะก่อนเริ่มรอบถัดไป",true);return}
-    const wolves=ids.filter(actualWolf),others=ids.filter(id=>!actualWolf(id));
+    const wolfSide=ids.filter(id=>teamOf(id)==="werewolves");
+    const villageSide=ids.filter(id=>teamOf(id)==="villagers");
+    const unresolved=ids.filter(id=>!['werewolves','villagers'].includes(teamOf(id)));
+    if(unresolved.length){setNote("🏁 Win Guard: มีฝ่ายที่ไม่ใช่ Village/Werewolf — ใช้การตรวจชัยชนะโดย Host",true);return}
     let winner="";
-    if(wolves.length===0)winner="ฝ่ายชาวบ้าน";
-    else if(wolves.length>=others.length)winner="ฝ่ายมนุษย์หมาป่า";
-    if(!winner){setNote(`🏁 Win Guard: ยังเล่นต่อ • หมาป่าจริง ${wolves.length} / ผู้เล่นอื่น ${others.length}`);return}
+    if(wolfSide.length===0)winner="ฝ่ายชาวบ้าน";
+    else if(wolfSide.length>=villageSide.length)winner="ฝ่ายมนุษย์หมาป่า";
+    if(!winner){setNote(`🏁 Win Guard: ยังเล่นต่อ • ฝ่ายหมาป่า ${wolfSide.length} / ฝ่ายชาวบ้าน ${villageSide.length}`);return}
     const signature=`${winner}|${ids.sort().join(",")}`;if(signature===lastDecision)return;lastDecision=signature;
-    await update(ref(db,roomPath()),{"public/status":"gameover","public/phase":{state:"gameover",winner,roleRevealed:false,endedAt:Date.now(),reason:winner==="ฝ่ายชาวบ้าน"?"no-wolves":"wolf-parity"}});
+    await update(ref(db,roomPath()),{"public/status":"gameover","public/phase":{state:"gameover",winner,roleRevealed:false,endedAt:Date.now(),reason:winner==="ฝ่ายชาวบ้าน"?"no-wolf-side":"wolf-side-parity"}});
     setNote(`🏁 เกมจบ: ${winner} • ไม่เปิดเผย Role`);
     try{if("speechSynthesis" in window){speechSynthesis.cancel();const v=new SpeechSynthesisUtterance(`เกมจบ ${winner} ชนะ`);v.lang="th-TH";speechSynthesis.speak(v)}}catch{}
   }catch(e){console.error("game-state-v3",e);setNote("🏁 Win Guard: ตรวจผลไม่สำเร็จ — ให้ Host ตรวจด้วยตนเอง",true)}finally{checking=false}
