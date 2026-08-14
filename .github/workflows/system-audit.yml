@@ -1,0 +1,26 @@
+name: Werewolf System Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  regression-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check JavaScript
+        shell: bash
+        run: |
+          set -e
+          for file in *.js scripts/*.mjs; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+      - name: Regression and rules audit
+        run: node scripts/regression-check.mjs
