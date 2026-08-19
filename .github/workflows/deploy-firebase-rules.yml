@@ -13,6 +13,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WEREWOLF_BOARD_GAME_9B361 }}
+
 jobs:
   deploy-rules:
     runs-on: ubuntu-latest
@@ -20,13 +23,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Firebase credential status
+        if: ${{ env.FIREBASE_CREDENTIALS == '' }}
+        run: |
+          echo "Firebase deploy skipped: repository secret FIREBASE_SERVICE_ACCOUNT_WEREWOLF_BOARD_GAME_9B361 is not configured yet."
+          echo "The shared rules remain the source of truth; add the secret once to enable automatic deployment."
+
       - name: Authenticate to Google Cloud
+        if: ${{ env.FIREBASE_CREDENTIALS != '' }}
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WEREWOLF_BOARD_GAME_9B361 }}
+          credentials_json: ${{ env.FIREBASE_CREDENTIALS }}
 
       - name: Install Firebase CLI
+        if: ${{ env.FIREBASE_CREDENTIALS != '' }}
         run: npm install --global firebase-tools
 
       - name: Deploy Realtime Database rules
+        if: ${{ env.FIREBASE_CREDENTIALS != '' }}
         run: firebase deploy --only database --project werewolf-board-game-9b361 --non-interactive
