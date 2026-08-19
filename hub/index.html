@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d1018">
+  <meta name="description" content="Board Game Hub — เลือกเกม สร้างห้อง หรือใส่ Room Code เพื่อเข้าเกมจากหน้าเดียว">
+  <title>Board Game Hub</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <header class="topbar shell">
+    <a class="brand" href="./" aria-label="Board Game Hub home">
+      <span class="brand-mark" aria-hidden="true">◇</span>
+      <span><strong>BOARD GAME</strong><small>HUB</small></span>
+    </a>
+    <span class="online-badge"><i></i> GAME NIGHT READY</span>
+  </header>
+
+  <main>
+    <section class="hero shell">
+      <div class="eyebrow">ONE PLACE • EVERY GAME</div>
+      <h1>เลือกเกม แล้วเริ่มเล่น<br><em>จากเว็บเดียว</em></h1>
+      <p class="hero-copy">สร้างห้องใหม่ หรือถ้ามี Room Code อยู่แล้วก็ใส่ด้านล่าง ระบบจะพาไปเกมที่ถูกต้องให้อัตโนมัติ</p>
+
+      <form id="joinForm" class="join-panel" novalidate>
+        <div class="join-copy">
+          <span class="join-label">มี Room Code แล้ว?</span>
+          <strong>เข้าเกมทันที</strong>
+          <small id="joinHint">รองรับ Werewolf, Insider และ SpyFall</small>
+        </div>
+        <div class="join-control">
+          <label class="sr-only" for="roomCode">Room Code</label>
+          <input id="roomCode" name="room" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="6" placeholder="ROOM CODE">
+          <button id="joinButton" type="submit">เข้าเกม <span aria-hidden="true">→</span></button>
+        </div>
+        <div id="detectedGame" class="detected" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section class="library shell" aria-labelledby="gamesTitle">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">GAME LIBRARY</div>
+          <h2 id="gamesTitle">คืนนี้เล่นอะไรดี?</h2>
+        </div>
+        <div class="library-count"><span id="gameCount">0</span> GAMES</div>
+      </div>
+      <div id="gameGrid" class="game-grid"></div>
+    </section>
+
+    <section class="how shell">
+      <div class="how-card">
+        <span class="how-num">01</span>
+        <div><strong>เลือกเกม</strong><small>ดูแนวเกม จำนวนผู้เล่น และความยาวโดยประมาณ</small></div>
+      </div>
+      <div class="how-card">
+        <span class="how-num">02</span>
+        <div><strong>สร้างห้อง</strong><small>คนหนึ่งเป็น Host แล้วแชร์ Room Code ให้เพื่อน</small></div>
+      </div>
+      <div class="how-card">
+        <span class="how-num">03</span>
+        <div><strong>เพื่อนเข้า Hub</strong><small>ใส่ Room Code หน้าเดียว ระบบเลือกเกมให้เอง</small></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer shell">
+    <span>BOARD GAME HUB</span>
+    <small>ศูนย์รวมเกม • เพิ่มเกมใหม่ได้โดยแก้รายการเดียวใน <code>app.js</code></small>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
